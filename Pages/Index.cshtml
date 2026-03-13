@@ -1,0 +1,191 @@
+﻿@page
+@model IndexModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TOAD | Organizes All Discussions</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        :root {
+            --bg: #111111;
+            --text: #e5e5e5;
+            --muted: #888888;
+            --border: #333333;
+            --accent: #4ade80; /* simple green */
+        }
+
+        .light-mode {
+            --bg: #ffffff;
+            --text: #111111;
+            --muted: #666666;
+            --border: #cccccc;
+            --accent: #16a34a;
+        }
+
+        body { 
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            transition: background-color 0s; 
+        }
+
+        ::selection {
+            background-color: var(--accent);
+            color: #000;
+        }
+
+        .action-link {
+            display: inline-block;
+            border: 2px solid var(--text);
+            padding: 8px 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-decoration: none;
+        }
+
+        .action-link:hover {
+            background-color: var(--text);
+            color: var(--bg);
+        }
+
+        .action-link.primary {
+            background-color: var(--text);
+            color: var(--bg);
+        }
+
+        .action-link.primary:hover {
+            background-color: transparent;
+            color: var(--text);
+        }
+        
+        .toad-icon {
+            color: var(--accent);
+        }
+
+        /* Brutalist Theme Switcher */
+        .theme-switch-container {
+            display: flex;
+            border: 1px solid var(--border);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.75rem;
+        }
+
+        .theme-btn {
+            padding: 4px 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .theme-btn.active {
+            background-color: var(--text);
+            color: var(--bg);
+        }
+
+        .theme-btn:not(.active):hover {
+            background-color: rgba(128, 128, 128, 0.1);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col items-center justify-center p-6 antialiased">
+
+    <main class="w-full max-w-2xl mx-auto space-y-8">
+        
+        <div>
+            <svg class="toad-icon w-24 h-24 mb-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter">
+                <path d="M4 18v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2" />
+                <path d="M6 12v-2a3 3 0 0 1 6 0v2" />
+                <path d="M12 12v-2a3 3 0 0 1 6 0v2" />
+                <line x1="7.5" y1="10.5" x2="9.5" y2="10.5" stroke-width="2" />
+                <line x1="14.5" y1="10.5" x2="16.5" y2="10.5" stroke-width="2" />
+                <line x1="7" y1="15" x2="17" y2="15" />
+                <path d="M4 18c-2 0-2 2-2 2h4" />
+                <path d="M20 18c2 0 2 2 2 2h-4" />
+                <line x1="8" y1="18" x2="8" y2="20" />
+                <line x1="16" y1="18" x2="16" y2="20" />
+                <rect x="15" y="13" width="1" height="1" fill="currentColor" stroke="none" />
+                <rect x="9" y="17" width="1" height="1" fill="currentColor" stroke="none" />
+            </svg>
+        </div>
+
+        <header class="space-y-4">
+            <h1 class="text-4xl md:text-5xl font-black tracking-tight">TOAD.</h1>
+            <p class="text-xl font-medium text-[var(--muted)]">TOAD Organizes All Discussions.</p>
+        </header>
+
+        <article class="prose prose-invert text-base md:text-lg border-y border-[var(--border)] py-8 space-y-4">
+            <p>
+                A calm place for real conversations. No algorithms. No engagement tricks.
+                Just people and discussions that actually matter.
+            </p>
+            <p>
+                TOAD is a lightweight open-source forum built for communities that want
+                control, privacy and simplicity.
+            </p>
+            <p>
+                Join the discussion or start your own.
+            </p>
+        </article>
+
+        <nav class="flex flex-wrap gap-4 pt-4">
+            <a asp-page="Register" class="action-link primary text-sm">Create account</a>
+            <a asp-page="Login" class="action-link text-sm">Login</a>
+        </nav>
+
+    </main>
+
+    <footer class="w-full max-w-2xl mx-auto mt-24 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-sm font-mono text-[var(--muted)] border-t border-[var(--border)] pt-6">
+        <div>
+            Built with C#, caffeine and curiosity.
+        </div>
+        
+        <div class="theme-switch-container">
+            <div id="btnDark" class="theme-btn active">Dark</div>
+            <div class="w-px bg-[var(--border)]"></div>
+            <div id="btnLight" class="theme-btn">Light</div>
+        </div>
+    </footer>
+
+    <script>
+        const body = document.body;
+        const btnDark = document.getElementById('btnDark');
+        const btnLight = document.getElementById('btnLight');
+
+        function setTheme(isLight) {
+            if (isLight) {
+                body.classList.add('light-mode');
+                btnLight.classList.add('active');
+                btnDark.classList.remove('active');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.remove('light-mode');
+                btnDark.classList.add('active');
+                btnLight.classList.remove('active');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Check for saved theme on load
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            setTheme(true);
+        }
+
+        // Event Listeners
+        btnLight.addEventListener('click', () => setTheme(true));
+        btnDark.addEventListener('click', () => setTheme(false));
+    </script>
+</body>
+</html>

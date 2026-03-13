@@ -1,0 +1,213 @@
+@page
+@model hopefullyAWebForum.Pages.ViewPosts
+@{
+Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TOAD | The Feed</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root {
+            --bg: #111111;
+            --text-titles: #ffffff; /* Čistě bílá pro nadpisy */
+            --text-content: #d1d1d1; /* Příjemnější "papírová" šedobílá pro text */
+            --muted: #888888;
+            --border: #222222;
+            --accent: #4ade80;
+        }
+
+        .light-mode {
+            --bg: #ffffff;
+            --text-titles: #111111;
+            --text-content: #333333;
+            --muted: #666666;
+            --border: #eeeeee;
+            --accent: #16a34a;
+        }
+
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-content);
+            line-height: 1.7; /* Trochu volnější řádkování pro lepší čtení */
+        }
+
+        h1, h2, h3 {
+            color: var(--text-titles);
+        }
+
+        .action-link {
+            display: inline-block;
+            border: 2px solid var(--text-titles);
+            padding: 8px 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-decoration: none;
+            font-size: 0.75rem;
+            color: var(--text-titles);
+        }
+
+        .action-link:hover {
+            background-color: var(--text-titles);
+            color: var(--bg);
+        }
+
+        .action-link.primary {
+            background-color: var(--text-titles);
+            color: var(--bg);
+        }
+
+        .feed-item {
+            padding: 2.5rem 1.5rem;
+            margin: 0 -1.5rem;
+            transition: background 0.2s ease;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .feed-item:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .light-mode .feed-item:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        .user-green {
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .toad-icon {
+            color: var(--accent);
+        }
+
+        .theme-btn {
+            padding: 4px 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: 700;
+            font-size: 0.7rem;
+            border: 1px solid var(--border);
+        }
+
+        .theme-btn.active {
+            background-color: var(--text-titles);
+            color: var(--bg);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col p-6">
+
+<div class="w-full max-w-3xl mx-auto flex-grow space-y-12">
+
+    <nav class="pt-8">
+        <a asp-page="Index" class="text-xs font-bold uppercase tracking-widest opacity-50 hover:opacity-100 transition-opacity">
+            ← Back to Home
+        </a>
+    </nav>
+
+    <header class="flex flex-col md:flex-row items-start md:items-center gap-8">
+        <div class="flex-shrink-0">
+            <svg class="toad-icon w-32 h-32" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="square" stroke-linejoin="miter">
+                <path d="M4 18v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2" />
+                <path d="M6 12v-2a3 3 0 0 1 6 0v2" />
+                <path d="M12 12v-2a3 3 0 0 1 6 0v2" />
+                <line x1="7.5" y1="10.5" x2="9.5" y2="10.5" stroke-width="1.8" />
+                <line x1="14.5" y1="10.5" x2="16.5" y2="10.5" stroke-width="1.8" />
+                <line x1="7" y1="15" x2="17" y2="15" />
+                <path d="M4 18c-2 0-2 2-2 2h4" />
+                <path d="M20 18c2 0 2 2 2 2h-4" />
+                <line x1="8" y1="18" x2="8" y2="20" />
+                <line x1="16" y1="18" x2="16" y2="20" />
+                <rect x="15" y="13" width="1" height="1" fill="currentColor" stroke="none" />
+                <rect x="9" y="17" width="1" height="1" fill="currentColor" stroke="none" />
+            </svg>
+        </div>
+
+        <div class="space-y-4">
+            <div class="space-y-2">
+                <h1 class="text-4xl md:text-5xl font-black tracking-tight uppercase leading-none">The Feed.</h1>
+                <p class="text-lg font-medium text-[var(--muted)]">
+                    Currently hosting <span class="text-[var(--text-titles)] font-bold">@Model.Posts.Count() threads</span>.
+                </p>
+            </div>
+            <div class="pt-2">
+                <a asp-page="AddPost" class="action-link primary">+ New Thread</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="space-y-0 border-t border-[var(--border)]">
+        @if (Model.Posts != null && Model.Posts.Any())
+        {
+            @foreach (var post in Model.Posts)
+            {
+            <article class="feed-item space-y-4">
+                <div class="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest opacity-80">
+                    <span class="opacity-50">From:</span>
+                    <span class="user-green">@post.AuthorName</span>
+                    <span class="opacity-40 ml-1">On: @post.CreatedAt.ToString("MMM dd, yyyy")</span>
+                </div>
+
+                <h2 class="text-2xl font-bold tracking-tight">
+                    @post.Topic
+                </h2>
+
+                <p class="text-[var(--text-content)] text-base line-clamp-3 leading-relaxed">
+                    @post.Content
+                </p>
+
+                <div class="pt-2">
+                    <a asp-page="/FocusPost" asp-route-id="@post.PostId" class="text-xs font-bold uppercase underline decoration-[var(--border)] underline-offset-8 hover:text-[var(--accent)] hover:decoration-[var(--accent)] transition-all">
+                        Enter Thread →
+                    </a>
+                </div>
+            </article>
+            }
+        }
+    </main>
+</div>
+
+<footer class="w-full max-w-3xl mx-auto mt-24 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-[10px] font-bold uppercase tracking-widest opacity-30 border-t border-[var(--border)] pt-6 pb-8">
+    <div>Built by Matespok // C# // 2024</div>
+    <div class="flex">
+        <div id="btnDark" class="theme-btn active">Dark</div>
+        <div id="btnLight" class="theme-btn">Light</div>
+    </div>
+</footer>
+
+<script>
+    const body = document.body;
+    const btnDark = document.getElementById('btnDark');
+    const btnLight = document.getElementById('btnLight');
+
+    function setTheme(isLight) {
+        if (isLight) {
+            body.classList.add('light-mode');
+            btnLight.classList.add('active');
+            btnDark.classList.remove('active');
+            localStorage.setItem('theme', 'light');
+        } else {
+            body.classList.remove('light-mode');
+            btnDark.classList.add('active');
+            btnLight.classList.remove('active');
+            localStorage.setItem('theme', 'dark');
+        }
+    }
+
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') setTheme(true);
+
+    btnLight.addEventListener('click', () => setTheme(true));
+    btnDark.addEventListener('click', () => setTheme(false));
+</script>
+</body>
+</html>

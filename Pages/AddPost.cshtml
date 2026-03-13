@@ -1,0 +1,184 @@
+@page
+@model hopefullyAWebForum.Pages.AddPost
+@{ Layout = null; }
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TOAD | New Thread</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        :root {
+            --bg: #111111;
+            --text: #e5e5e5;
+            --muted: #888888;
+            --border: #222222;
+            --accent: #4ade80; 
+        }
+
+        .light-mode {
+            --bg: #ffffff;
+            --text: #111111;
+            --muted: #666666;
+            --border: #eeeeee;
+            --accent: #16a34a;
+        }
+
+        body { 
+            font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        ::selection {
+            background-color: var(--accent);
+            color: #000;
+        }
+
+        input, textarea {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 16px;
+            width: 100%;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .light-mode input, .light-mode textarea { background: rgba(0, 0, 0, 0.02); }
+        
+        input:focus, textarea:focus { 
+            border-color: var(--accent);
+            background: transparent;
+        }
+
+        .btn {
+            border: 1px solid var(--text);
+            padding: 12px 24px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+        .btn:hover { background: var(--text); color: var(--bg); }
+
+        .toad-icon {
+            color: var(--accent);
+        }
+
+        .user-green {
+            color: var(--accent);
+            font-weight: 400;
+        }
+
+        .theme-btn {
+            padding: 4px 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: 700;
+            font-size: 0.7rem;
+            border: 1px solid var(--border);
+        }
+        .theme-btn.active { background: var(--text); color: var(--bg); }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col p-6">
+    
+    <div class="w-full max-w-3xl mx-auto flex-grow space-y-12">
+        
+        <nav class="pt-8">
+            <a asp-page="/ViewPosts" class="text-xs font-bold uppercase tracking-widest opacity-50 hover:opacity-100">
+                ← Discard and go back
+            </a>
+        </nav>
+
+        <header class="flex flex-col md:flex-row items-start md:items-center gap-8 border-b border-[var(--border)] pb-12">
+            <div class="flex-shrink-0">
+                <svg class="toad-icon w-32 h-32" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="square" stroke-linejoin="miter">
+                    <path d="M4 18v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2" />
+                    <path d="M6 12v-2a3 3 0 0 1 6 0v2" />
+                    <path d="M12 12v-2a3 3 0 0 1 6 0v2" />
+                    <line x1="7.5" y1="10.5" x2="9.5" y2="10.5" stroke-width="1.8" />
+                    <line x1="14.5" y1="10.5" x2="16.5" y2="10.5" stroke-width="1.8" />
+                    <line x1="7" y1="15" x2="17" y2="15" />
+                    <path d="M4 18c-2 0-2 2-2 2h4" />
+                    <path d="M20 18c2 0 2 2 2 2h-4" />
+                    <line x1="8" y1="18" x2="8" y2="20" />
+                    <line x1="16" y1="18" x2="16" y2="20" />
+                    <rect x="15" y="13" width="1" height="1" fill="currentColor" stroke="none" />
+                    <rect x="9" y="17" width="1" height="1" fill="currentColor" stroke="none" />
+                </svg>
+            </div>
+            <div class="space-y-2">
+                <h1 class="text-4xl md:text-5xl font-black tracking-tight uppercase leading-none">New Thread.</h1>
+                <p class="text-lg font-medium text-[var(--muted)]">
+                    Make the the thread <span class="user-green">simple</span> and read it <span class="user-green">before</span> you post it
+                </p>
+            </div>
+        </header>
+
+        <form method="post" class="space-y-10 max-w-2xl">
+            
+            <div class="space-y-3">
+                <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-[var(--muted)]">Thread Topic</label>
+                <input asp-for="Topic" required 
+                       class="text-xl font-bold tracking-tight" 
+                       placeholder="Enter a descriptive title">
+            </div>
+            
+            <div class="space-y-3">
+                <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-[var(--muted)]">Message Content</label>
+                <textarea asp-for="Content" rows="4" required 
+                          class="text-base leading-relaxed resize-y" 
+                          placeholder="Tell us, what's on your mind?"></textarea>
+            </div>
+
+            <div class="pt-4">
+                <button type="submit" class="btn">
+                    Spill it out into TOAD
+                </button>
+            </div>
+            
+        </form>
+    </div>
+
+    <footer class="w-full max-w-3xl mx-auto mt-24 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-[10px] font-bold uppercase tracking-widest opacity-30 border-t border-[var(--border)] pt-6 pb-8">
+        <div>Built by Matespok // C# // 2024</div>
+        <div class="flex">
+            <div id="btnDark" class="theme-btn active">Dark</div>
+            <div id="btnLight" class="theme-btn">Light</div>
+        </div>
+    </footer>
+
+    <script>
+        const body = document.body;
+        const btnDark = document.getElementById('btnDark');
+        const btnLight = document.getElementById('btnLight');
+
+        function setTheme(isLight) {
+            if (isLight) {
+                body.classList.add('light-mode');
+                btnLight.classList.add('active');
+                btnDark.classList.remove('active');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.remove('light-mode');
+                btnDark.classList.add('active');
+                btnLight.classList.remove('active');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') setTheme(true);
+
+        btnLight.addEventListener('click', () => setTheme(true));
+        btnDark.addEventListener('click', () => setTheme(false));
+    </script>
+</body>
+</html>

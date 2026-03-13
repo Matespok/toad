@@ -1,0 +1,215 @@
+@page
+@model hopefullyAWebForum.Pages.Dashboard
+
+@{
+Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TOAD | Dashboard</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root {
+            --bg: #111111;
+            --text: #e5e5e5;
+            --muted: #888888;
+            --border: #333333;
+            --accent: #4ade80;
+            --error: #ef4444;
+        }
+
+        .light-mode {
+            --bg: #ffffff;
+            --text: #111111;
+            --muted: #666666;
+            --border: #cccccc;
+            --accent: #16a34a;
+            --error: #dc2626;
+        }
+
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            transition: background-color 0s;
+        }
+
+        ::selection {
+            background-color: var(--accent);
+            color: #000;
+        }
+
+        /* Action Buttons */
+        .action-btn {
+            display: inline-block;
+            border: 2px solid var(--text);
+            padding: 8px 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-decoration: none;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.875rem;
+        }
+
+        .action-btn.primary {
+            background-color: var(--text);
+            color: var(--bg);
+        }
+
+        .action-btn.primary:hover {
+            background-color: transparent;
+            color: var(--text);
+        }
+
+        .action-btn.danger {
+            border-color: var(--error);
+            color: var(--error);
+        }
+
+        .action-btn.danger:hover {
+            background-color: var(--error);
+            color: var(--bg);
+        }
+
+        /* Brutalist Panel */
+        .debug-panel {
+            border: 2px solid var(--border);
+            padding: 2rem;
+            background: transparent;
+        }
+
+        /* Theme Switcher */
+        .theme-switch-container {
+            display: flex;
+            border: 1px solid var(--border);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.75rem;
+        }
+
+        .theme-btn {
+            padding: 4px 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .theme-btn.active {
+            background-color: var(--text);
+            color: var(--bg);
+        }
+
+        .theme-btn:not(.active):hover {
+            background-color: rgba(128, 128, 128, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col p-6 antialiased">
+
+<div class="w-full max-w-3xl mx-auto flex-grow pt-10">
+
+    <nav class="pb-8 border-b border-[var(--border)] mb-8">
+        <a asp-page="/Index" class="font-bold text-sm text-[var(--muted)] hover:text-[var(--text)] underline decoration-[var(--border)] underline-offset-4">
+            ← Back to Home
+        </a>
+    </nav>
+
+    @if (Model.LoggedUserId != null)
+    {
+    <h2 class="text-3xl font-black tracking-tight mb-8">
+        Welcome, @Model.LoggedUserName!
+    </h2>
+    }
+
+    <div class="debug-panel space-y-6">
+        <h4 class="text-xl font-bold border-b border-[var(--border)] pb-4">
+            🔍 Debug Info: Session Status
+        </h4>
+
+        <div class="space-y-4">
+            @if (Model.LoggedUserId != null)
+            {
+            <div class="grid grid-cols-3">
+                <span class="text-[var(--muted)] font-bold">Status:</span>
+                <span class="col-span-2 text-[var(--accent)] font-bold">Logged in</span>
+            </div>
+            <div class="grid grid-cols-3">
+                <span class="text-[var(--muted)] font-bold">User ID:</span>
+                <span class="col-span-2">@Model.LoggedUserId</span>
+            </div>
+            <div class="grid grid-cols-3">
+                <span class="text-[var(--muted)] font-bold">User name:</span>
+                <span class="col-span-2">@Model.LoggedUserName</span>
+            </div>
+
+            <div class="pt-6 mt-2 border-t border-[var(--border)] flex gap-4">
+                <a asp-page="/AddPost" class="action-btn primary">Make a post</a>
+                <a asp-page="/ViewPosts" class="action-btn">View posts</a>
+            </div>
+            }
+            else
+            {
+            <div class="grid grid-cols-3">
+                <span class="text-[var(--muted)] font-bold">Status:</span>
+                <span class="col-span-2 text-[var(--error)] font-bold">Not logged in, sessionID is empty</span>
+            </div>
+            }
+        </div>
+    </div>
+
+    <div class="mt-8">
+        <a asp-page="/Index" class="action-btn danger">Logout</a>
+    </div>
+
+</div>
+
+<footer class="w-full max-w-3xl mx-auto mt-20 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-sm font-mono text-[var(--muted)] border-t border-[var(--border)] pt-6 pb-8">
+    <div>
+        Built by Matespok // C#
+    </div>
+
+    <div class="theme-switch-container">
+        <div id="btnDark" class="theme-btn active">Dark</div>
+        <div class="w-px bg-[var(--border)]"></div>
+        <div id="btnLight" class="theme-btn">Light</div>
+    </div>
+</footer>
+
+<script>
+    const body = document.body;
+    const btnDark = document.getElementById('btnDark');
+    const btnLight = document.getElementById('btnLight');
+
+    function setTheme(isLight) {
+        if (isLight) {
+            body.classList.add('light-mode');
+            btnLight.classList.add('active');
+            btnDark.classList.remove('active');
+            localStorage.setItem('theme', 'light');
+        } else {
+            body.classList.remove('light-mode');
+            btnDark.classList.add('active');
+            btnLight.classList.remove('active');
+            localStorage.setItem('theme', 'dark');
+        }
+    }
+
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        setTheme(true);
+    }
+
+    btnLight.addEventListener('click', () => setTheme(true));
+    btnDark.addEventListener('click', () => setTheme(false));
+</script>
+</body>
+</html>

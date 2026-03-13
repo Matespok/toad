@@ -1,0 +1,167 @@
+@page
+@model hopefullyAWebForum.Pages.FocusPost
+@{ Layout = null; }
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@Model.focusedPost.Topic | TOAD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg: #111111;
+            --text: #e5e5e5;
+            --muted: #888888;
+            --border: #222222;
+            --accent: #4ade80;
+        }
+        .light-mode {
+            --bg: #ffffff;
+            --text: #111111;
+            --muted: #666666;
+            --border: #eeeeee;
+            --accent: #16a34a;
+        }
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .theme-btn {
+            padding: 4px 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: 700;
+            font-size: 0.7rem;
+            border: 1px solid var(--border);
+        }
+        .theme-btn.active { background: var(--text); color: var(--bg); }
+        
+        input, textarea {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 16px;
+            width: 100%;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .light-mode textarea { background: rgba(0, 0, 0, 0.02); }
+        
+        input:focus, textarea:focus { 
+            border-color: var(--accent);
+            background: transparent;
+        }
+
+        .btn {
+            border: 1px solid var(--text);
+            padding: 8px 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            transition: 0.2s;
+        }
+        .btn:hover { background: var(--text); color: var(--bg); }
+
+        .user-green {
+            color: var(--accent);
+            font-weight: 400;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <nav class="max-w-2xl mx-auto px-6 py-8 flex justify-between items-center">
+        <a asp-page="ViewPosts" class="text-xs font-bold uppercase tracking-widest opacity-50 hover:opacity-100">← Back</a>
+        <div class="flex">
+            <div id="btnDark" class="theme-btn active">Dark</div>
+            <div id="btnLight" class="theme-btn">Light</div>
+        </div>
+    </nav>
+
+    <main class="max-w-2xl mx-auto px-6 pb-24">
+        <article class="mb-16">
+            <header class="mb-8">
+                <div class="flex items-center gap-3 text-xs font-medium text-[var(--muted)] uppercase tracking-wider">
+                    <span class="text-[var(--text)]">From: <span class="user-green">@Model.focusedPost.AuthorName</span></span>
+                    <span>•</span>
+                    <span>On: @Model.focusedPost.CreatedAt.ToString("MMMM dd, yyyy")</span>
+                </div>
+                <h1 class="text-3xl md:text-4xl font-black tracking-tight leading-tight mt-2 mb-4">
+                    @Model.focusedPost.Topic
+                </h1>
+            </header>
+            <hr class="border-[var(--border)]" />
+            <div class="text-lg text-[var(--text)] whitespace-pre-line my-10 leading-relaxed">
+                @Model.focusedPost.Content
+            </div>
+
+            <button onclick="document.getElementById('reply-area').classList.toggle('hidden')" class="btn">
+                Reply
+            </button>
+
+            <div id="reply-area" class="mt-8 hidden">
+                <form method="post" class="space-y-4">
+                    <textarea asp-for="Reply" rows="5" placeholder="Write your response..."></textarea>
+                    <div class="flex justify-end">
+                        <button type="submit" class="btn">Submit Post</button>
+                    </div>
+                </form>
+            </div>
+        </article>
+
+        <section>
+            <h2 class="text-xs font-black uppercase tracking-[0.2em] text-[var(--muted)] mb-8 border-b border-[var(--border)] pb-2">
+                @Model.CommentList.Count Responses
+            </h2>
+
+            <div class="space-y-12">
+                @foreach(var comment in Model.CommentList) {
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest opacity-80">
+                            <span class="opacity-50">From:</span>
+                            <span class="user-green">@comment.AuthorName</span>
+                            <span class="opacity-40 ml-1">On: @comment.CommentedAt.ToString("HH:mm")</span>
+                        </div>
+                        <div class="text-base opacity-90 leading-relaxed">
+                            @comment.Content
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+    </main>
+
+    <footer class="max-w-2xl mx-auto px-6 py-12 border-t border-[var(--border)] text-[10px] font-bold uppercase tracking-widest opacity-30">
+        TOAD // Matespok // 2024
+    </footer>
+
+    <script>
+        const body = document.body;
+        const btnDark = document.getElementById('btnDark');
+        const btnLight = document.getElementById('btnLight');
+
+        function setTheme(isLight) {
+            if (isLight) {
+                body.classList.add('light-mode');
+                btnLight.classList.add('active');
+                btnDark.classList.remove('active');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.remove('light-mode');
+                btnDark.classList.add('active');
+                btnLight.classList.remove('active');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') setTheme(true);
+        btnLight.addEventListener('click', () => setTheme(true));
+        btnDark.addEventListener('click', () => setTheme(false));
+    </script>
+</body>
+</html>

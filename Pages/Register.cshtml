@@ -1,0 +1,218 @@
+@page
+@model hopefullyAWebForum.Pages.Register
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TOAD | Register</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        :root {
+            --bg: #111111;
+            --text: #e5e5e5;
+            --muted: #888888;
+            --border: #333333;
+            --accent: #4ade80; /* simple green */
+        }
+
+        .light-mode {
+            --bg: #ffffff;
+            --text: #111111;
+            --muted: #666666;
+            --border: #cccccc;
+            --accent: #16a34a;
+        }
+
+        body { 
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            transition: background-color 0s; 
+        }
+
+        ::selection {
+            background-color: var(--accent);
+            color: #000;
+        }
+
+        /* The Toad */
+        .toad-icon {
+            color: var(--accent);
+        }
+
+        /* Brutalist Inputs */
+        .toad-input {
+            width: 100%;
+            background-color: transparent;
+            border: 2px solid var(--border);
+            color: var(--text);
+            padding: 12px 16px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0s;
+        }
+
+        .toad-input:focus {
+            border-color: var(--text);
+        }
+
+        /* Action Buttons */
+        .action-btn {
+            display: inline-block;
+            width: 100%;
+            border: 2px solid var(--text);
+            padding: 12px 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-decoration: none;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .action-btn.primary {
+            background-color: var(--text);
+            color: var(--bg);
+        }
+
+        .action-btn.primary:hover {
+            background-color: transparent;
+            color: var(--text);
+        }
+
+        /* Brutalist Theme Switcher */
+        .theme-switch-container {
+            display: flex;
+            border: 1px solid var(--border);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.75rem;
+        }
+
+        .theme-btn {
+            padding: 4px 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .theme-btn.active {
+            background-color: var(--text);
+            color: var(--bg);
+        }
+
+        .theme-btn:not(.active):hover {
+            background-color: rgba(128, 128, 128, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-6 antialiased">
+
+    <main class="w-full max-w-md mx-auto space-y-8">
+        
+        <nav>
+            <a asp-page="Index" class="text-[var(--muted)] hover:text-[var(--text)] font-mono text-sm underline decoration-[var(--border)] underline-offset-4">
+                [ ← back to index ]
+            </a>
+        </nav>
+
+        <header class="space-y-4">
+            <svg class="toad-icon w-16 h-16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter">
+                <path d="M4 18v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2" />
+                <path d="M6 12v-2a3 3 0 0 1 6 0v2" />
+                <path d="M12 12v-2a3 3 0 0 1 6 0v2" />
+                <line x1="7.5" y1="10.5" x2="9.5" y2="10.5" stroke-width="2" />
+                <line x1="14.5" y1="10.5" x2="16.5" y2="10.5" stroke-width="2" />
+                <line x1="7" y1="15" x2="17" y2="15" />
+                <path d="M4 18c-2 0-2 2-2 2h4" />
+                <path d="M20 18c2 0 2 2 2 2h-4" />
+                <line x1="8" y1="18" x2="8" y2="20" />
+                <line x1="16" y1="18" x2="16" y2="20" />
+                <rect x="15" y="13" width="1" height="1" fill="currentColor" stroke="none" />
+                <rect x="9" y="17" width="1" height="1" fill="currentColor" stroke="none" />
+            </svg>
+
+            <div>
+                <h1 class="text-3xl md:text-4xl font-black tracking-tight">Register.</h1>
+                <p class="text-[var(--muted)] font-medium mt-1">Create your identity to join the discussion.</p>
+            </div>
+        </header>
+
+        <form method="post" class="space-y-6">
+            <div class="space-y-2">
+                <label class="block font-bold text-sm uppercase tracking-wider">Username</label>
+                <input asp-for="Uname" required 
+                    class="toad-input" 
+                    placeholder="Enter username...">
+            </div>
+
+            <div class="space-y-2">
+                <label class="block font-bold text-sm uppercase tracking-wider">Password</label>
+                <input asp-for="Pass" type="password" required 
+                    class="toad-input" 
+                    placeholder="••••••••••••">
+            </div>
+
+            <button type="submit" class="action-btn primary mt-4">
+                Register
+            </button>
+        </form>
+
+        <div class="pt-6 border-t border-[var(--border)] text-sm">
+            <span class="text-[var(--muted)]">Already have an account?</span>
+            <a asp-page="Login" class="font-bold hover:text-[var(--accent)] underline decoration-[var(--border)] underline-offset-4 ml-2">Login here.</a>
+        </div>
+
+    </main>
+
+    <footer class="w-full max-w-md mx-auto mt-16 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-sm font-mono text-[var(--muted)] border-t border-[var(--border)] pt-6">
+        <div>
+            Built by Matespok // C#
+        </div>
+        
+        <div class="theme-switch-container">
+            <div id="btnDark" class="theme-btn active">Dark</div>
+            <div class="w-px bg-[var(--border)]"></div>
+            <div id="btnLight" class="theme-btn">Light</div>
+        </div>
+    </footer>
+
+    <script>
+        const body = document.body;
+        const btnDark = document.getElementById('btnDark');
+        const btnLight = document.getElementById('btnLight');
+
+        function setTheme(isLight) {
+            if (isLight) {
+                body.classList.add('light-mode');
+                btnLight.classList.add('active');
+                btnDark.classList.remove('active');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.remove('light-mode');
+                btnDark.classList.add('active');
+                btnLight.classList.remove('active');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Check for saved theme on load
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            setTheme(true);
+        }
+
+        // Event Listeners
+        btnLight.addEventListener('click', () => setTheme(true));
+        btnDark.addEventListener('click', () => setTheme(false));
+    </script>
+</body>
+</html>

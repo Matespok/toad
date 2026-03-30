@@ -23,7 +23,7 @@ Ensure you have the following installed:
 ### 2. Environment Setup
 1. **Clone the repository:**
     ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/Matespok/toad.git
    ```
 2. Configure environment variables:
 - rename **.env.example** file to **.env** and put your variables into it.

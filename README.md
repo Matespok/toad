@@ -23,4 +23,13 @@ To run the project on your local machine, follow these steps:
    ```bash
    dotnet run
    ```
+## To-Do / Roadmap
+- [ ] Docker :)
+- [ ] Db connection close or just begin one, not 100
+- [ ] Wrap comments and threads
+- [ ] Verify if username already exists during registration
+- [ ] Implement replies to comments
+- [ ] Display user profiles, their threads, and replies
+- [ ] Improve navigation (`<aside>` panel)
+- [ ] Limit maximum input length and implement rate limiting
 

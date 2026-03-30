@@ -487,7 +487,6 @@ $RECYCLE.BIN/
 # Ignorujeme konfigurace s connection stringy
 appsettings.json
 appsettings.Development.json
-appsettings.*.json
 
 # Pro jistotu, kdyby sis někdy hrál s lokální SQLite
 *.db

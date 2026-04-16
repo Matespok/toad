@@ -3,14 +3,13 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace hopefullyAWebForum.Pages;
 
-
 public class ViewPosts : PageModel
 {
+    private readonly DbMethods _db = new();
     public List<Post> Posts { get; set; } = new();
 
-    public void OnGet()
+    public async Task OnGetAsync()
     {
-        Posts = DbMethods.ReadPost();
+        Posts = await _db.ReadPostAsync();
     }
 }
-

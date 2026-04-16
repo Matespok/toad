@@ -42,11 +42,11 @@ Ensure you have the following installed:
   dotnet run 
   ```
 ## To-Do / Roadmap
-- [X] Docker :)
-- [ ] Db connection close or just begin one, not 100
+- [X] Docker :) / not complete tho
+- [X] Async db from sync, connections opened asynchronously
 - [ ] Wrap comments and threads
 - [ ] Verify if username already exists during registration,
-      login or tell user to do so.
+- [X] after registration login or tell user to do so.
 - [ ] Implement replies to comments
 - [ ] Display user profiles, their threads, and replies
 - [ ] Improve navigation (`<aside>` panel)

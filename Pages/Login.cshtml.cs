@@ -7,18 +7,19 @@ namespace hopefullyAWebForum.Pages;
 
 public class Login : PageModel
 {
-    
+    private readonly DbMethods _db = new();
+
     [BindProperty]
     public string Uname { get; set; }
 
     [BindProperty]
     public string Pass { get; set; }
-    
+
     public string? WrongLogin { get; set; }
 
-    public IActionResult OnPost()
+    public async Task<IActionResult> OnPost()
     {
-        int? userId = DbMethods.AuthenticateUser(Uname, Pass);
+        int? userId = await _db.AuthenticateUserAsync(Uname, Pass);
 
         if (userId != null)
         {
@@ -27,7 +28,6 @@ public class Login : PageModel
             HttpContext.Session.SetString("Username", Uname);
 
             return RedirectToPage("/ViewPosts");
-
         }
         else
         {
@@ -35,7 +35,4 @@ public class Login : PageModel
             return Page();
         }
     }
-
-    public void OnGet() { }
 }
-

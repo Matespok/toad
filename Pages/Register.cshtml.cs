@@ -1,13 +1,17 @@
+using hopefullyAWebForum.Pages.Data;
+using hopefullyAWebForum.Pages.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using hopefullyAWebForum.Pages.Models; 
-using hopefullyAWebForum.Pages.Data;  
+
 namespace hopefullyAWebForum.Pages;
 
 public class Register : PageModel
 {
     private readonly ApplicationDbContext _context;
+    private readonly DbMethods _db = new();
+
+    public void OnGet() { }
 
     public Register(ApplicationDbContext context)
     {
@@ -16,12 +20,14 @@ public class Register : PageModel
 
     [BindProperty]
     public string Uname { get; set; } = string.Empty;
-    
+
     [BindProperty]
     public string Pass { get; set; } = string.Empty;
 
-    public void OnPost()
+    public async Task<IActionResult> OnPostAsync()
     {
-        DbMethods.AddUser(Uname, Pass);
+        await _db.AddUserAsync(Uname, Pass);
+
+        return RedirectToPage("/Login");
     }
 }

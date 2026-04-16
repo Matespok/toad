@@ -6,27 +6,39 @@ namespace hopefullyAWebForum.Pages;
 
 public class AddPost : PageModel
 {
+    private readonly DbMethods _db = new();
+
     [BindProperty]
     public string Topic { get; set; }
 
     [BindProperty]
     public string Content { get; set; }
 
-    public void OnPost()
+    public async Task<IActionResult> OnGetAsync()
     {
         int? currentUserId = HttpContext.Session.GetInt32("UserId");
 
         if (currentUserId == null)
         {
-            Response.Redirect("/Login");
-            return;
+            return RedirectToPage("/Login");
+        }
+        else
+        {
+            return Page();
+        }
+    }
+
+    public async Task<IActionResult> OnPostAsync()
+    {
+        int? currentUserId = HttpContext.Session.GetInt32("UserId");
+
+        if (currentUserId == null)
+        {
+            return RedirectToPage("/Login");
         }
 
-        Console.WriteLine($"User ID: {currentUserId} made a post: {Topic}");
+        await _db.AddPostAsync(currentUserId.Value, Topic, Content);
 
-        DbMethods.AddPost(currentUserId.Value, Topic, Content);
-
-        Response.Redirect("/ViewPosts");
+        return RedirectToPage("/ViewPosts");
     }
 }
-

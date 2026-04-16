@@ -18,14 +18,15 @@ public class DbMethods
      * Initialize DB
      * =================
 */
-    public static void InitializeDb()
+
+    public async Task InitializeDbAsync()
     {
-        using (var connection = new NpgsqlConnection(_connectionString))
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+        //Table Users
+        await using (var cmd = conn.CreateCommand())
         {
-            //Table Users
-            connection.Open();
-            var command = connection.CreateCommand();
-            command.CommandText =
+            cmd.CommandText =
                 @"
                 CREATE TABLE IF NOT EXISTS ""Users"" (
                     ""Id"" SERIAL PRIMARY KEY,
@@ -33,10 +34,10 @@ public class DbMethods
                     ""Password"" TEXT NOT NULL
                 );";
 
-            command.ExecuteNonQuery();
+            await cmd.ExecuteNonQueryAsync();
 
             //Table posts
-            command.CommandText =
+            cmd.CommandText =
                 @"
             CREATE TABLE IF NOT EXISTS ""Posts"" (
                 ""PostId"" SERIAL PRIMARY KEY,
@@ -46,20 +47,10 @@ public class DbMethods
                 ""CreatedAt"" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 CONSTRAINT fk_user FOREIGN KEY(""UserId"") REFERENCES ""Users""(""Id"") ON DELETE CASCADE
             );";
-            command.ExecuteNonQuery();
+            await cmd.ExecuteNonQueryAsync();
 
             //Table comments
-            /*
-             * Table comments
-             * CommentId will create itself,
-             * CommentedAt will create itself
-             *
-             * Int UserId
-             * Int PostId
-             * Int ParentCommentId -> nullable
-             * string content
-             * */
-            command.CommandText =
+            cmd.CommandText =
                 @"
             CREATE TABLE IF NOT EXISTS ""Comments"" (
                 ""CommentId"" SERIAL PRIMARY KEY,
@@ -84,7 +75,7 @@ public class DbMethods
                 ON DELETE CASCADE
                 );
              ";
-            command.ExecuteNonQuery();
+            await cmd.ExecuteNonQueryAsync();
         }
     }
 
@@ -93,21 +84,41 @@ public class DbMethods
      * User registration
      * ==================
      */
-    public static void AddUser(string username, string password)
+    /*public static void AddUser(string username, string password)
+    {
+        if (_conn.State != ConnectionState.Open)
+            _conn.Open();
+
+        using (var cmd = _conn.CreateCommand())
+        {
+            string passHash = BCrypt.Net.BCrypt.HashPassword(password);
+            cmd.CommandText =
+                @"
+                INSERT INTO ""Users"" (""Username"", ""Password"")
+                VALUES (@uname, @pass);";
+            cmd.Parameters.AddWithValue("@uname", username);
+            cmd.Parameters.AddWithValue("@pass", passHash);
+
+            cmd.ExecuteNonQuery();
+        }
+    }*/
+
+    public async Task AddUserAsync(string username, string password)
     {
         string passHash = BCrypt.Net.BCrypt.HashPassword(password);
-        using (var connection = new NpgsqlConnection(_connectionString))
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+        await using (var cmd = conn.CreateCommand())
         {
-            connection.Open();
-            var command = connection.CreateCommand();
-            command.CommandText =
+            cmd.CommandText =
                 @"
-                INSERT INTO ""Users"" (""Username"", ""Password"") 
-                VALUES (@uname, @pass);";
-            command.Parameters.AddWithValue("@uname", username);
-            command.Parameters.AddWithValue("@pass", passHash);
+          INSERT INTO ""Users"" (""Username"", ""Password"")
+          VALUES (@uname, @pass);
+          ";
+            cmd.Parameters.AddWithValue("@uname", username);
+            cmd.Parameters.AddWithValue("@pass", passHash);
 
-            command.ExecuteNonQuery();
+            await cmd.ExecuteNonQueryAsync();
         }
     }
 
@@ -115,24 +126,25 @@ public class DbMethods
      * =============
      * USER LOGIN
      * =============
+    *
     */
-    public static int? AuthenticateUser(string username, string password)
-    {
-        using (var connection = new NpgsqlConnection(_connectionString))
-        {
-            connection.Open();
-            var command = connection.CreateCommand();
 
-            command.CommandText =
+    public async Task<int?> AuthenticateUserAsync(string username, string password)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+        await using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText =
                 @"
             SELECT ""Id"", ""Password"" 
             FROM ""Users"" 
             WHERE ""Username"" = @uname;";
-            command.Parameters.AddWithValue("@uname", username);
+            cmd.Parameters.AddWithValue("@uname", username);
 
-            using (var reader = command.ExecuteReader())
+            await using (var reader = await cmd.ExecuteReaderAsync())
             {
-                if (reader.Read())
+                if (await reader.ReadAsync())
                 {
                     int id = reader.GetInt32(0);
                     string storedHash = reader.GetString(1);
@@ -147,12 +159,43 @@ public class DbMethods
         }
     }
 
+    /*public static int? AuthenticateUser(string username, string password)
+    {
+        if (_conn.State != ConnectionState.Open)
+            _conn.Open();
+
+        using (var cmd = _conn.CreateCommand)
+        {
+            cmd.CommandText =
+                @"
+            SELECT ""Id"", ""Password""
+            FROM ""Users""
+            WHERE ""Username"" = @uname;";
+            cmd.Parameters.AddWithValue("@uname", username);
+
+            using (var reader = cmd.ExecuteReader())
+            {
+                if (reader.Read())
+                {
+                    int id = reader.GetInt32(0);
+                    string storedHash = reader.GetString(1);
+
+                    if (BCrypt.Net.BCrypt.Verify(password, storedHash))
+                    {
+                        return id;
+                    }
+                }
+            }
+            return null;
+        }
+    }*/
+
     /*
      * =============
      * Post creation
      * =============
     */
-    public static void AddPost(int? userId, string topic, string content)
+    /*public static void AddPost(int? userId, string topic, string content)
     {
         using (var connection = new NpgsqlConnection(_connectionString))
         {
@@ -168,6 +211,24 @@ public class DbMethods
             command.Parameters.AddWithValue("@content", content);
             command.ExecuteNonQuery();
         }
+    }*/
+
+    public async Task AddPostAsync(int userId, string topic, string content)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+        await using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText =
+                @"
+          INSERT INTO ""Posts"" (""UserId"", ""Topic"", ""Content"")
+          VALUES (@userId, @topic, @content);
+          ";
+            cmd.Parameters.AddWithValue("@userId", userId);
+            cmd.Parameters.AddWithValue("@topic", topic);
+            cmd.Parameters.AddWithValue("@content", content);
+            await cmd.ExecuteNonQueryAsync();
+        }
     }
 
     /*
@@ -177,7 +238,7 @@ public class DbMethods
      * */
     /* return object Post -> read it at ShowPosts.cshtml.cs -> ShowPosts.cshtml shows user 10 recent posts.
       */
-    public static List<Post> ReadPost()
+    /*public static List<Post> ReadPost()
     {
         List<Post> postList = new();
         using (var connection = new NpgsqlConnection(_connectionString))
@@ -185,9 +246,10 @@ public class DbMethods
             connection.Open();
             var command = connection.CreateCommand();
             command.CommandText =
-                @"select p.""PostId"", u.""Username"", p.""Topic"", p.""Content"", p.""CreatedAt""
-                    from ""Posts"" p, ""Users"" u
-                    WHERE p.""UserId"" = u.""Id"";
+                @"SELECT p.""PostId"", u.""Username"", p.""Topic"", p.""Content"", p.""CreatedAt""
+                    FROM ""Posts"" p, ""Users"" u
+                    WHERE p.""UserId"" = u.""Id""
+                    ORDER BY p.""CreatedAt"" DESC;
                  ";
 
             using (var reader = command.ExecuteReader())
@@ -204,31 +266,95 @@ public class DbMethods
                     };
                     postList.Add(post1);
                 }
+            }
+            return postList;
+        }
+    }*/
 
-                postList.Reverse();
+    public async Task<List<Post>> ReadPostAsync()
+    {
+        List<Post> postList = new();
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+        await using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText =
+                @"
+            SELECT p.""PostId"", u.""Username"", p.""Topic"", p.""Content"", p.""CreatedAt""
+                    FROM ""Posts"" p, ""Users"" u
+                    WHERE p.""UserId"" = u.""Id""
+                    ORDER BY p.""CreatedAt"" DESC;
+            ";
+            await using (var reader = await cmd.ExecuteReaderAsync())
+            {
+                while (await reader.ReadAsync())
+                {
+                    var post1 = new Post
+                    {
+                        PostId = reader.GetInt32(0),
+                        AuthorName = reader.GetString(1),
+                        Topic = reader.GetString(2),
+                        Content = reader.GetString(3),
+                        CreatedAt = reader.GetDateTime(4),
+                    };
+                    postList.Add(post1);
+                }
             }
             return postList;
         }
     }
 
-    public static Post ShowPost(int postId)
+    /*   public static Post ShowPost(int postId)
+       {
+           using (var connection = new NpgsqlConnection(_connectionString))
+           {
+               connection.Open();
+               var command = connection.CreateCommand();
+               command.CommandText =
+                   @"
+               SELECT p.""PostId"", u.""Username"", p.""Topic"", p.""Content"", p.""CreatedAt""
+               FROM ""Posts"" p
+               JOIN ""Users"" u ON p.""UserId"" = u.""Id""
+               WHERE p.""PostId"" = @postId";
+   
+               command.Parameters.AddWithValue("@postId", postId);
+   
+               using (var reader = command.ExecuteReader())
+               {
+                   if (reader.Read())
+                   {
+                       return new Post
+                       {
+                           PostId = reader.GetInt32(0),
+                           AuthorName = reader.GetString(1),
+                           Topic = reader.GetString(2),
+                           Content = reader.GetString(3),
+                           CreatedAt = reader.GetDateTime(4),
+                       };
+                   }
+               }
+           }
+           return null;
+       }*/
+
+    public async Task<Post?> ShowPostAsync(int postId)
     {
-        using (var connection = new NpgsqlConnection(_connectionString))
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        await using (var cmd = conn.CreateCommand())
         {
-            connection.Open();
-            var command = connection.CreateCommand();
-            command.CommandText =
+            cmd.CommandText =
                 @"
             SELECT p.""PostId"", u.""Username"", p.""Topic"", p.""Content"", p.""CreatedAt""
             FROM ""Posts"" p
             JOIN ""Users"" u ON p.""UserId"" = u.""Id""
             WHERE p.""PostId"" = @postId";
+            cmd.Parameters.AddWithValue("@postId", postId);
 
-            command.Parameters.AddWithValue("@postId", postId);
-
-            using (var reader = command.ExecuteReader())
+            await using (var reader = await cmd.ExecuteReaderAsync())
             {
-                if (reader.Read())
+                if (await reader.ReadAsync())
                 {
                     return new Post
                     {
@@ -244,63 +370,74 @@ public class DbMethods
         return null;
     }
 
-    //Table comments
     /*
-     * Table comments
-     * CommentId will create itself,
-     *
-     * Int UserId
-     * Int PostId
-     * Int ParentCommentId -> nullable
-     * string content
-     * */
-
-    public static void AddComment(int userId, int postId, int? parentId, string content)
-    {
-        using (var connection = new NpgsqlConnection(_connectionString))
+        public static void AddComment(int userId, int postId, int? parentId, string content)
         {
-            connection.Open();
-            var command = connection.CreateCommand();
+            using (var connection = new NpgsqlConnection(_connectionString))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+    
+                command.CommandText =
+                    @"
+                INSERT INTO ""Comments"" (""UserId"", ""PostId"", ""ParentCommentId"", ""Content"")
+                VALUES (@userId, @postId, @parentId, @content);
+    ";
+    
+                command.Parameters.AddWithValue("@userId", userId);
+                command.Parameters.AddWithValue("@postId", postId);
+                command.Parameters.AddWithValue("@parentId", (object)parentId ?? DBNull.Value);
+                command.Parameters.AddWithValue("@content", content);
+    
+                command.ExecuteNonQuery();
+            }
+        }
+    */
+    public async Task AddCommentAsync(int userId, int postId, int? parentId, string content)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
 
-            command.CommandText =
+        await using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText =
                 @"
             INSERT INTO ""Comments"" (""UserId"", ""PostId"", ""ParentCommentId"", ""Content"")
             VALUES (@userId, @postId, @parentId, @content);
-";
+          ";
 
-            command.Parameters.AddWithValue("@userId", userId);
-            command.Parameters.AddWithValue("@postId", postId);
-            command.Parameters.AddWithValue("@parentId", (object)parentId ?? DBNull.Value);
-            command.Parameters.AddWithValue("@content", content);
+            cmd.Parameters.AddWithValue("@userId", userId);
+            cmd.Parameters.AddWithValue("@postId", postId);
+            cmd.Parameters.AddWithValue("@parentId", (object)parentId ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@content", content);
 
-            command.ExecuteNonQuery();
+            await cmd.ExecuteNonQueryAsync();
         }
     }
 
-    public static List<Comment> ShowComments(int postId)
+    public async Task<List<Comment>> ShowCommentsAsync(int postId)
     {
         List<Comment> allComments = new();
-        using (var connection = new NpgsqlConnection(_connectionString))
+
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        await using (var cmd = conn.CreateCommand())
         {
-            connection.Open();
-            /* Structure of class Comments ->
-               *    public string AuthorName { get; set; }
-                    public int ParentCommentId { get; set; }
-                    public DateTime CommentedAt { get; set; }
-                    string Content { get; set; }
-              */
-            var command = connection.CreateCommand();
-            command.CommandText =
+            cmd.CommandText =
                 @"
-             SELECT u.""Username"", c.""ParentCommentId"", c.""CommentedAt"", c.""Content""
+            SELECT u.""Username"", c.""ParentCommentId"", c.""CommentedAt"", c.""Content""
             FROM ""Comments"" c
-            JOIN ""Users"" u ON c.""UserId"" = u.""Id""  -- Předpokládám název sloupce UserId a Id
+            JOIN ""Users"" u ON c.""UserId"" = u.""Id""
             WHERE c.""PostId"" = @postId
-          ";
-            command.Parameters.AddWithValue("@postId", postId);
-            using (var reader = command.ExecuteReader())
+            ORDER BY ""CommentedAt"" DESC;
+            ";
+
+            cmd.Parameters.AddWithValue("@postId", postId);
+
+            await using (var reader = await cmd.ExecuteReaderAsync())
             {
-                while (reader.Read())
+                while (await reader.ReadAsync())
                 {
                     var comment1 = new Comment
                     {
@@ -311,9 +448,39 @@ public class DbMethods
                     };
                     allComments.Add(comment1);
                 }
-                allComments.Reverse();
             }
             return allComments;
         }
     }
+    /*
+        public static List<Comment> ShowComments(int postId)
+        {
+                var command = connection.CreateCommand();
+                command.CommandText =
+                    @"
+                 SELECT u.""Username"", c.""ParentCommentId"", c.""CommentedAt"", c.""Content""
+                FROM ""Comments"" c
+                JOIN ""Users"" u ON c.""UserId"" = u.""Id""
+                WHERE c.""PostId"" = @postId
+              ";
+                command.Parameters.AddWithValue("@postId", postId);
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var comment1 = new Comment
+                        {
+                            AuthorName = reader.GetString(0),
+                            ParentCommentId = reader.IsDBNull(1) ? 0 : reader.GetInt32(1), // NULL OR NOT NULL
+                            CommentedAt = reader.GetDateTime(2),
+                            Content = reader.GetString(3),
+                        };
+                        allComments.Add(comment1);
+                    }
+                    allComments.Reverse();
+                }
+                return allComments;
+            }
+        }
+    */
 }

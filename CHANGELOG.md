@@ -9,7 +9,7 @@ All notable changes to this project will be documented in this file.
 - Updated PageModels (AddPost, FocusPost,...) to support the Post-Redirect-Get pattern with Task<IActionResult>.
 
 ### Changed
-- Docker running :) - not complete tho
+- Docker running :) ~~- not complete tho~~ - fully running in docker
 ## [0.1.0] - Mar-13-2026
 ### Added
 - Initial release (published to GitHub).

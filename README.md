@@ -17,7 +17,6 @@ Follow these steps to get the project up and running on your local machine:
 
 ### 1. Prerequisites
 Ensure you have the following installed:
-* **.NET 9.0 SDK**
 * **Docker** & **Docker Compose**
 
 ### 2. Environment Setup
@@ -30,19 +29,16 @@ Ensure you have the following installed:
   *(Note: Application connects to the database using these values.
   You can leave the defaults for testing locally.)*
 
-3. Configure the app settings*(If changed)*
+3. Configure the app settings
 - rename **appsettings.example.json** to **appsettings.json**
 
 4. Start Docker
    ```bash 
-      docker-compose up -d
+      docker-compose up --build
       ```
-5. Start the web server
-  ```bash
-  dotnet run 
-  ```
+
 ## To-Do / Roadmap
-- [X] Docker :) / not complete tho
+- [X] Docker :)
 - [X] Async db from sync, connections opened asynchronously
 - [ ] Wrap comments and threads
 - [ ] Verify if username already exists during registration,

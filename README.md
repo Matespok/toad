@@ -47,4 +47,5 @@ Ensure you have the following installed:
 - [ ] Display user profiles, their threads, and replies
 - [ ] Improve navigation (`<aside>` panel)
 - [ ] Limit maximum input length and implement rate limiting
-
+- [ ] Rewrite dbmethods to Dapper
+- [ ] Dependency injection

@@ -84,24 +84,6 @@ public class DbMethods
      * User registration
      * ==================
      */
-    /*public static void AddUser(string username, string password)
-    {
-        if (_conn.State != ConnectionState.Open)
-            _conn.Open();
-
-        using (var cmd = _conn.CreateCommand())
-        {
-            string passHash = BCrypt.Net.BCrypt.HashPassword(password);
-            cmd.CommandText =
-                @"
-                INSERT INTO ""Users"" (""Username"", ""Password"")
-                VALUES (@uname, @pass);";
-            cmd.Parameters.AddWithValue("@uname", username);
-            cmd.Parameters.AddWithValue("@pass", passHash);
-
-            cmd.ExecuteNonQuery();
-        }
-    }*/
 
     public async Task AddUserAsync(string username, string password)
     {
@@ -159,59 +141,11 @@ public class DbMethods
         }
     }
 
-    /*public static int? AuthenticateUser(string username, string password)
-    {
-        if (_conn.State != ConnectionState.Open)
-            _conn.Open();
-
-        using (var cmd = _conn.CreateCommand)
-        {
-            cmd.CommandText =
-                @"
-            SELECT ""Id"", ""Password""
-            FROM ""Users""
-            WHERE ""Username"" = @uname;";
-            cmd.Parameters.AddWithValue("@uname", username);
-
-            using (var reader = cmd.ExecuteReader())
-            {
-                if (reader.Read())
-                {
-                    int id = reader.GetInt32(0);
-                    string storedHash = reader.GetString(1);
-
-                    if (BCrypt.Net.BCrypt.Verify(password, storedHash))
-                    {
-                        return id;
-                    }
-                }
-            }
-            return null;
-        }
-    }*/
-
     /*
      * =============
      * Post creation
      * =============
     */
-    /*public static void AddPost(int? userId, string topic, string content)
-    {
-        using (var connection = new NpgsqlConnection(_connectionString))
-        {
-            connection.Open();
-            var command = connection.CreateCommand();
-            command.CommandText =
-                @"
-            INSERT INTO ""Posts"" (""UserId"", ""Topic"", ""Content"")
-            VALUES (@userId, @topic, @content);
-            ";
-            command.Parameters.AddWithValue("@userId", userId);
-            command.Parameters.AddWithValue("@topic", topic);
-            command.Parameters.AddWithValue("@content", content);
-            command.ExecuteNonQuery();
-        }
-    }*/
 
     public async Task AddPostAsync(int userId, string topic, string content)
     {
@@ -236,40 +170,6 @@ public class DbMethods
      * post read
      * ===========
      * */
-    /* return object Post -> read it at ShowPosts.cshtml.cs -> ShowPosts.cshtml shows user 10 recent posts.
-      */
-    /*public static List<Post> ReadPost()
-    {
-        List<Post> postList = new();
-        using (var connection = new NpgsqlConnection(_connectionString))
-        {
-            connection.Open();
-            var command = connection.CreateCommand();
-            command.CommandText =
-                @"SELECT p.""PostId"", u.""Username"", p.""Topic"", p.""Content"", p.""CreatedAt""
-                    FROM ""Posts"" p, ""Users"" u
-                    WHERE p.""UserId"" = u.""Id""
-                    ORDER BY p.""CreatedAt"" DESC;
-                 ";
-
-            using (var reader = command.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    var post1 = new Post
-                    {
-                        PostId = reader.GetInt32(0),
-                        AuthorName = reader.GetString(1),
-                        Topic = reader.GetString(2),
-                        Content = reader.GetString(3),
-                        CreatedAt = reader.GetDateTime(4),
-                    };
-                    postList.Add(post1);
-                }
-            }
-            return postList;
-        }
-    }*/
 
     public async Task<List<Post>> ReadPostAsync()
     {
@@ -304,39 +204,6 @@ public class DbMethods
         }
     }
 
-    /*   public static Post ShowPost(int postId)
-       {
-           using (var connection = new NpgsqlConnection(_connectionString))
-           {
-               connection.Open();
-               var command = connection.CreateCommand();
-               command.CommandText =
-                   @"
-               SELECT p.""PostId"", u.""Username"", p.""Topic"", p.""Content"", p.""CreatedAt""
-               FROM ""Posts"" p
-               JOIN ""Users"" u ON p.""UserId"" = u.""Id""
-               WHERE p.""PostId"" = @postId";
-   
-               command.Parameters.AddWithValue("@postId", postId);
-   
-               using (var reader = command.ExecuteReader())
-               {
-                   if (reader.Read())
-                   {
-                       return new Post
-                       {
-                           PostId = reader.GetInt32(0),
-                           AuthorName = reader.GetString(1),
-                           Topic = reader.GetString(2),
-                           Content = reader.GetString(3),
-                           CreatedAt = reader.GetDateTime(4),
-                       };
-                   }
-               }
-           }
-           return null;
-       }*/
-
     public async Task<Post?> ShowPostAsync(int postId)
     {
         await using var conn = new NpgsqlConnection(_connectionString);
@@ -370,29 +237,6 @@ public class DbMethods
         return null;
     }
 
-    /*
-        public static void AddComment(int userId, int postId, int? parentId, string content)
-        {
-            using (var connection = new NpgsqlConnection(_connectionString))
-            {
-                connection.Open();
-                var command = connection.CreateCommand();
-    
-                command.CommandText =
-                    @"
-                INSERT INTO ""Comments"" (""UserId"", ""PostId"", ""ParentCommentId"", ""Content"")
-                VALUES (@userId, @postId, @parentId, @content);
-    ";
-    
-                command.Parameters.AddWithValue("@userId", userId);
-                command.Parameters.AddWithValue("@postId", postId);
-                command.Parameters.AddWithValue("@parentId", (object)parentId ?? DBNull.Value);
-                command.Parameters.AddWithValue("@content", content);
-    
-                command.ExecuteNonQuery();
-            }
-        }
-    */
     public async Task AddCommentAsync(int userId, int postId, int? parentId, string content)
     {
         await using var conn = new NpgsqlConnection(_connectionString);
@@ -477,36 +321,4 @@ public class DbMethods
             return false;
         }
     }
-
-    /*
-        public static List<Comment> ShowComments(int postId)
-        {
-                var command = connection.CreateCommand();
-                command.CommandText =
-                    @"
-                 SELECT u.""Username"", c.""ParentCommentId"", c.""CommentedAt"", c.""Content""
-                FROM ""Comments"" c
-                JOIN ""Users"" u ON c.""UserId"" = u.""Id""
-                WHERE c.""PostId"" = @postId
-              ";
-                command.Parameters.AddWithValue("@postId", postId);
-                using (var reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        var comment1 = new Comment
-                        {
-                            AuthorName = reader.GetString(0),
-                            ParentCommentId = reader.IsDBNull(1) ? 0 : reader.GetInt32(1), // NULL OR NOT NULL
-                            CommentedAt = reader.GetDateTime(2),
-                            Content = reader.GetString(3),
-                        };
-                        allComments.Add(comment1);
-                    }
-                    allComments.Reverse();
-                }
-                return allComments;
-            }
-        }
-    */
 }

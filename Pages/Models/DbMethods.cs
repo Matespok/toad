@@ -452,6 +452,32 @@ public class DbMethods
             return allComments;
         }
     }
+
+    public async Task<bool> IsRegistered(string uname)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        await using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText =
+                @"
+        SELECT ""Username""
+        FROM ""Users""
+        WHERE ""Username"" = @uname
+        ";
+            cmd.Parameters.AddWithValue("@uname", uname);
+            await using (var reader = await cmd.ExecuteReaderAsync())
+            {
+                if (await reader.ReadAsync())
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
     /*
         public static List<Comment> ShowComments(int postId)
         {

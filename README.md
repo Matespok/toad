@@ -40,8 +40,8 @@ Ensure you have the following installed:
 ## To-Do / Roadmap
 - [X] Docker :)
 - [X] Async db from sync, connections opened asynchronously
-- [ ] Wrap comments and threads
-- [ ] Verify if username already exists during registration,
+- [X] Wrap comments and threads
+- [X] Verify if username already exists during registration,
 - [X] after registration login or tell user to do so.
 - [ ] Implement replies to comments
 - [ ] Display user profiles, their threads, and replies

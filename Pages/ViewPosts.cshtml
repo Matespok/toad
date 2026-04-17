@@ -36,7 +36,8 @@ Layout = null;
             font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
             background-color: var(--bg);
             color: var(--text-content);
-            line-height: 1.7; /* Trochu volnější řádkování pro lepší čtení */
+            line-height: 1.7;
+            
         }
 
         h1, h2, h3 {
@@ -161,7 +162,7 @@ Layout = null;
                     @post.Topic
                 </h2>
 
-                <p class="text-[var(--text-content)] text-base line-clamp-3 leading-relaxed">
+                <p class="text-[var(--text-content)] text-base line-clamp-3 leading-relaxed break-words">
                     @post.Content
                 </p>
 

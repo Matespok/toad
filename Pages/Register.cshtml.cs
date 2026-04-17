@@ -24,10 +24,21 @@ public class Register : PageModel
     [BindProperty]
     public string Pass { get; set; } = string.Empty;
 
+    public string? WrongLogin { get; set; }
+
     public async Task<IActionResult> OnPostAsync()
     {
-        await _db.AddUserAsync(Uname, Pass);
+        bool alreadyRegistered = await _db.IsRegistered(Uname);
+        if (alreadyRegistered == true)
+        {
+            WrongLogin = "Username already used, pick something different";
+            return Page();
+        }
+        else
+        {
+            await _db.AddUserAsync(Uname, Pass);
 
-        return RedirectToPage("/Login");
+            return RedirectToPage("/Login");
+        }
     }
 }

@@ -30,6 +30,14 @@
             color: var(--text);
             line-height: 1.6;
         }
+
+        /* KLÍČOVÉ OPRAVY PRO ZALAMOVÁNÍ */
+        .content-wrap {
+            overflow-wrap: anywhere; 
+            word-break: normal;
+            hyphens: auto;
+        }
+
         .theme-btn {
             padding: 4px 12px;
             cursor: pointer;
@@ -90,14 +98,13 @@
                     <span>•</span>
                     <span>On: @Model.focusedPost.CreatedAt.ToString("MMMM dd, yyyy")</span>
                 </div>
-                <h1 class="text-3xl md:text-4xl font-black tracking-tight leading-tight mt-2 mb-4">
+                <h1 class="text-3xl md:text-4xl font-black tracking-tight leading-tight mt-2 mb-4 break-all">
                     @Model.focusedPost.Topic
                 </h1>
             </header>
             <hr class="border-[var(--border)]" />
-            <div class="text-lg text-[var(--text)] whitespace-pre-line my-10 leading-relaxed">
-                @Model.focusedPost.Content
-            </div>
+            
+            <div class="text-lg text-[var(--text)] whitespace-pre-wrap my-10 leading-relaxed content-wrap">@Model.focusedPost.Content</div>
 
             <button onclick="document.getElementById('reply-area').classList.toggle('hidden')" class="btn">
                 Reply
@@ -126,9 +133,7 @@
                             <span class="user-green">@comment.AuthorName</span>
                             <span class="opacity-40 ml-1">On: @comment.CommentedAt.ToString("HH:mm")</span>
                         </div>
-                        <div class="text-base opacity-90 leading-relaxed">
-                            @comment.Content
-                        </div>
+                        <div class="text-base opacity-90 leading-relaxed content-wrap break-all whitespace-pre-wrap">@comment.Content</div>
                     </div>
                 }
             </div>

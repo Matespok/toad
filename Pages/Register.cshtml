@@ -142,7 +142,13 @@
 
             <div>
                 <h1 class="text-3xl md:text-4xl font-black tracking-tight">Register.</h1>
-                <p class="text-[var(--muted)] font-medium mt-1">Create your identity to join the discussion.</p>
+                <p class="text-[var(--muted)] font-medium mt-1">Create an account.</p>
+                @if (!string.IsNullOrEmpty(Model.WrongLogin))
+                {
+                    <div class="border-2 border-[var(--error)] text-[var(--error)] p-3 text-sm font-bold uppercase tracking-wide">
+                        Error: @Model.WrongLogin
+                    </div>
+                }
             </div>
         </header>
 

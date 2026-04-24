@@ -2,10 +2,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## Small changes:
-- Added ViewUser, which displays his threads
+## [0.1.2] - Apr-24-2026
+- Added ViewUser, which displays its threads and comments
 - Can now click on username, which will display users profile
-- Edited class DbMethods, Post and User
+- Edited class DbMethods, Post, User, Comment 
 
 ## [0.1.1] - Apr-16-2026
 - Migrated all database operations in DbMethods from synchronous to asynchronous (Task, await).

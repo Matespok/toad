@@ -11,9 +11,12 @@ public class ViewUser : PageModel
 
     public List<Post> Posts { get; set; } = new();
 
+    public List<Comment> Comments { get; set; } = new();
+
     public async Task OnGetAsync(int id)
     {
         SelectedUser = await _db.GetUserInfoAsync(id);
         Posts = await _db.GetUserPostsAsync(id);
+        Comments = await _db.GetUserCommentsAsync(id);
     }
 }

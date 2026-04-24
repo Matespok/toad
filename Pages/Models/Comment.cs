@@ -11,7 +11,9 @@ public class Comment
              * Int ParentCommentId -> nullable
              * string content
              * */
+
     public string AuthorName { get; set; }
+    public int PostId { get; set; }
     public int? ParentCommentId { get; set; }
     public DateTime CommentedAt { get; set; }
     public string Content { get; set; }

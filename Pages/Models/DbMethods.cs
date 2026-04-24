@@ -392,4 +392,43 @@ public class DbMethods
             return postList;
         }
     }
+
+    public async Task<List<Comment>> GetUserCommentsAsync(int id)
+    {
+        List<Comment> allComments = new();
+
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        await using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText =
+                @"
+            SELECT u.""Username"", c.""PostId"", c.""ParentCommentId"", c.""CommentedAt"", c.""Content""
+            FROM ""Comments"" c
+            JOIN ""Users"" u ON c.""UserId"" = u.""Id""
+            WHERE c.""UserId"" = @userId
+            ORDER BY ""CommentedAt"" DESC;
+            ";
+
+            cmd.Parameters.AddWithValue("@userId", id);
+
+            await using (var reader = await cmd.ExecuteReaderAsync())
+            {
+                while (await reader.ReadAsync())
+                {
+                    var comment1 = new Comment
+                    {
+                        AuthorName = reader.GetString(0),
+                        PostId = reader.GetInt32(1),
+                        ParentCommentId = reader.IsDBNull(2) ? 0 : reader.GetInt32(1), // NULL OR NOT NULL
+                        CommentedAt = reader.GetDateTime(3),
+                        Content = reader.GetString(4),
+                    };
+                    allComments.Add(comment1);
+                }
+            }
+            return allComments;
+        }
+    }
 }

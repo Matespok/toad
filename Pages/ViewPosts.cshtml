@@ -154,7 +154,7 @@ Layout = null;
             <article class="feed-item space-y-4">
                 <div class="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest opacity-80">
                     <span class="opacity-50">From:</span>
-                    <span class="user-green">@post.AuthorName</span>
+                    <a asp-page="/ViewUser" asp-route-id="@post.UserId" class="user-green">@post.AuthorName</a>
                     <span class="opacity-40 ml-1">On: @post.CreatedAt.ToString("MMM dd, yyyy")</span>
                 </div>
 

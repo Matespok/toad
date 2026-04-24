@@ -44,7 +44,7 @@ Ensure you have the following installed:
 - [X] Verify if username already exists during registration,
 - [X] after registration login or tell user to do so.
 - [ ] Implement replies to comments
-- [ ] Display user profiles, their threads, and replies
+- [ ] ~~Display user profiles, their threads,~~ and replies
 - [ ] Improve navigation (`<aside>` panel)
 - [ ] Limit maximum input length and implement rate limiting
 - [ ] Rewrite dbmethods to Dapper

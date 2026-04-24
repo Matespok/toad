@@ -1,0 +1,188 @@
+@page
+@model hopefullyAWebForum.Pages.Shared.ViewUser
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TOAD | @(Model.SelectedUser?.Username ?? "User Not Found")</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root {
+            --bg: #111111;
+            --text-titles: #ffffff;
+            --text-content: #d1d1d1;
+            --muted: #888888;
+            --border: #222222;
+            --accent: #4ade80;
+        }
+
+        .light-mode {
+            --bg: #ffffff;
+            --text-titles: #111111;
+            --text-content: #333333;
+            --muted: #666666;
+            --border: #eeeeee;
+            --accent: #16a34a;
+        }
+
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-content);
+            line-height: 1.7;
+        }
+
+        h1, h2, h3 {
+            color: var(--text-titles);
+        }
+
+        .feed-item {
+            padding: 2.5rem 1.5rem;
+            margin: 0 -1.5rem;
+            transition: background 0.2s ease;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .feed-item:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .light-mode .feed-item:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        .user-green {
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .theme-btn {
+            padding: 4px 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: 700;
+            font-size: 0.7rem;
+            border: 1px solid var(--border);
+        }
+
+        .theme-btn.active {
+            background-color: var(--text-titles);
+            color: var(--bg);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col p-6">
+
+<div class="w-full max-w-3xl mx-auto flex-grow space-y-12">
+
+    <nav class="pt-8">
+        <a asp-page="/ViewPosts" class="text-xs font-bold uppercase tracking-widest opacity-50 hover:opacity-100 transition-opacity">
+            ← Back to Feed
+        </a>
+    </nav>
+
+    @if (Model.SelectedUser != null)
+    {
+        <header class="space-y-6">
+            <div class="space-y-2">
+                <div class="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--accent)]">User Profile</div>
+                <h1 class="text-5xl md:text-6xl font-black tracking-tight uppercase leading-none">
+                    @Model.SelectedUser.Username
+                </h1>
+                <p class="text-sm font-medium text-[var(--muted)]">
+                    Joined on <span class="text-[var(--text-titles)]">@Model.SelectedUser.JoinDate.ToString("MMMM dd, yyyy")</span>
+                </p>
+            </div>
+            
+            <div class="pt-4 border-b border-[var(--border)] pb-4">
+                <h2 class="text-xs font-bold uppercase tracking-widest opacity-50">
+                    Activity: @(Model.Posts?.Count() ?? 0) total posts
+                </h2>
+            </div>
+        </header>
+
+        <main class="space-y-0">
+            @if (Model.Posts != null && Model.Posts.Any())
+            {
+                @foreach (var post in Model.Posts)
+                {
+                    <article class="feed-item space-y-4">
+                        <div class="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest opacity-80">
+                            <span class="opacity-50">On: @post.CreatedAt.ToString("MMM dd, yyyy")</span>
+                        </div>
+
+                        <h2 class="text-2xl font-bold tracking-tight">
+                            @post.Topic
+                        </h2>
+
+                        <p class="text-[var(--text-content)] text-base line-clamp-3 leading-relaxed break-words">
+                            @post.Content
+                        </p>
+
+                        <div class="pt-2">
+                            <a asp-page="/FocusPost" asp-route-id="@post.PostId" class="text-xs font-bold uppercase underline decoration-[var(--border)] underline-offset-8 hover:text-[var(--accent)] hover:decoration-[var(--accent)] transition-all">
+                                View Full Thread →
+                            </a>
+                        </div>
+                    </article>
+                }
+            }
+            else
+            {
+                <div class="py-20 text-center">
+                    <p class="text-sm uppercase tracking-widest opacity-30 font-bold">This user hasn't posted anything yet.</p>
+                </div>
+            }
+        </main>
+    }
+    else
+    {
+        <header class="py-20 text-center">
+            <h1 class="text-4xl font-black uppercase italic opacity-20">404 // User Not Found</h1>
+            <a asp-page="/Index" class="mt-8 inline-block text-xs font-bold uppercase underline underline-offset-4">Return to safety</a>
+        </header>
+    }
+</div>
+
+<footer class="w-full max-w-3xl mx-auto mt-24 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-[10px] font-bold uppercase tracking-widest opacity-30 border-t border-[var(--border)] pt-6 pb-8">
+    <div>Built by Matespok // C# // 2026</div>
+    <div class="flex">
+        <div id="btnDark" class="theme-btn active">Dark</div>
+        <div id="btnLight" class="theme-btn">Light</div>
+    </div>
+</footer>
+
+<script>
+    const body = document.body;
+    const btnDark = document.getElementById('btnDark');
+    const btnLight = document.getElementById('btnLight');
+
+    function setTheme(isLight) {
+        if (isLight) {
+            body.classList.add('light-mode');
+            btnLight.classList.add('active');
+            btnDark.classList.remove('active');
+            localStorage.setItem('theme', 'light');
+        } else {
+            body.classList.remove('light-mode');
+            btnDark.classList.add('active');
+            btnLight.classList.remove('active');
+            localStorage.setItem('theme', 'dark');
+        }
+    }
+
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') setTheme(true);
+
+    btnLight.addEventListener('click', () => setTheme(true));
+    btnDark.addEventListener('click', () => setTheme(false));
+</script>
+</body>
+</html>

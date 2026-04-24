@@ -31,8 +31,9 @@ public class DbMethods
                 CREATE TABLE IF NOT EXISTS ""Users"" (
                     ""Id"" SERIAL PRIMARY KEY,
                     ""Username"" TEXT UNIQUE NOT NULL,
-                    ""Password"" TEXT NOT NULL
-                );";
+                    ""Password"" TEXT NOT NULL,
+                    ""JoinDate"" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );";
 
             await cmd.ExecuteNonQueryAsync();
 
@@ -180,7 +181,7 @@ public class DbMethods
         {
             cmd.CommandText =
                 @"
-            SELECT p.""PostId"", u.""Username"", p.""Topic"", p.""Content"", p.""CreatedAt""
+            SELECT p.""PostId"", u.""Username"", p.""UserId"", p.""Topic"", p.""Content"", p.""CreatedAt""
                     FROM ""Posts"" p, ""Users"" u
                     WHERE p.""UserId"" = u.""Id""
                     ORDER BY p.""CreatedAt"" DESC;
@@ -193,9 +194,10 @@ public class DbMethods
                     {
                         PostId = reader.GetInt32(0),
                         AuthorName = reader.GetString(1),
-                        Topic = reader.GetString(2),
-                        Content = reader.GetString(3),
-                        CreatedAt = reader.GetDateTime(4),
+                        UserId = reader.GetInt32(2),
+                        Topic = reader.GetString(3),
+                        Content = reader.GetString(4),
+                        CreatedAt = reader.GetDateTime(5),
                     };
                     postList.Add(post1);
                 }
@@ -213,7 +215,7 @@ public class DbMethods
         {
             cmd.CommandText =
                 @"
-            SELECT p.""PostId"", u.""Username"", p.""Topic"", p.""Content"", p.""CreatedAt""
+            SELECT p.""PostId"", u.""Username"", p.""UserId"", p.""Topic"", p.""Content"", p.""CreatedAt""
             FROM ""Posts"" p
             JOIN ""Users"" u ON p.""UserId"" = u.""Id""
             WHERE p.""PostId"" = @postId";
@@ -227,9 +229,10 @@ public class DbMethods
                     {
                         PostId = reader.GetInt32(0),
                         AuthorName = reader.GetString(1),
-                        Topic = reader.GetString(2),
-                        Content = reader.GetString(3),
-                        CreatedAt = reader.GetDateTime(4),
+                        UserId = reader.GetInt32(2),
+                        Topic = reader.GetString(3),
+                        Content = reader.GetString(4),
+                        CreatedAt = reader.GetDateTime(5),
                     };
                 }
             }
@@ -319,6 +322,74 @@ public class DbMethods
                 }
             }
             return false;
+        }
+    }
+
+    /*
+     *  first i need the user and the info about him
+     * */
+
+    public async Task<User?> GetUserInfoAsync(int id)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        await using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText =
+                @"
+                  SELECT ""Username"", ""JoinDate""
+                  FROM ""Users""
+                  WHERE ""Id"" = @id;
+                  ";
+            cmd.Parameters.AddWithValue("@id", id);
+
+            await using (var reader = await cmd.ExecuteReaderAsync())
+            {
+                if (await reader.ReadAsync())
+                {
+                    return new User
+                    {
+                        Username = reader.GetString(0),
+                        JoinDate = reader.GetDateTime(1),
+                    };
+                }
+            }
+        }
+        return null;
+    }
+
+    public async Task<List<Post>> GetUserPostsAsync(int id)
+    {
+        List<Post> postList = new();
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+        await using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText =
+                @"
+            SELECT p.""PostId"", u.""Username"", p.""Topic"", p.""Content"", p.""CreatedAt""
+                    FROM ""Posts"" p, ""Users"" u
+                    WHERE p.""UserId"" = u.""Id"" AND p.""UserId"" = @userId
+                    ORDER BY p.""CreatedAt"" DESC;
+            ";
+            cmd.Parameters.AddWithValue("@userId", id);
+            await using (var reader = await cmd.ExecuteReaderAsync())
+            {
+                while (await reader.ReadAsync())
+                {
+                    var post1 = new Post
+                    {
+                        PostId = reader.GetInt32(0),
+                        AuthorName = reader.GetString(1),
+                        Topic = reader.GetString(2),
+                        Content = reader.GetString(3),
+                        CreatedAt = reader.GetDateTime(4),
+                    };
+                    postList.Add(post1);
+                }
+            }
+            return postList;
         }
     }
 }

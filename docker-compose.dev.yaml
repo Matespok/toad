@@ -16,7 +16,7 @@ services:
 
   web:
     # Místo "build: ." použijeme přímo SDK obraz (rychlejší start, podpora watch)
-    image: mcr.microsoft.com/dotnet/sdk:9.0
+    image: mcr.microsoft.com/dotnet/sdk:10.0
     container_name: toadAspWeb
     restart: always
     

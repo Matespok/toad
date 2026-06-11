@@ -45,6 +45,6 @@ public class Create : PageModel
         // Voláme metodu přímo z repozitáře
         await _repo.AddPostAsync(currentUserId.Value, Topic, PostContent);
 
-        return RedirectToPage("/ViewPosts");
+        return RedirectToPage("/Posts/Index");
     }
 }

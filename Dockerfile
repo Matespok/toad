@@ -11,7 +11,7 @@ COPY . .
 RUN dotnet publish "toad.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # 2. Fáze: Spuštění (zde použijeme malý a rychlý ASP.NET Runtime)
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
 

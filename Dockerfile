@@ -1,19 +1,20 @@
+# 1. Fáze: Sestavení aplikace (zde použijeme velké SDK)
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
-COPY ["hopefullyAWebForum.csproj", "./"]
-RUN dotnet restore "hopefullyAWebForum.csproj"
 
+# Zkopírujeme projekt a obnovíme závislosti (zrychluje další buildy)
+COPY ["toad.csproj", "./"]
+RUN dotnet restore "toad.csproj"
+
+# Zkopírujeme zbytek kódů a zkompilujeme v Release režimu
 COPY . .
-RUN dotnet build "hopefullyAWebForum.csproj" -c Release -o /app/build
+RUN dotnet publish "toad.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-FROM build AS publish
-RUN dotnet publish "hopefullyAWebForum.csproj" -c Release -o /app/publish /p:UseAppHost=false
-
+# 2. Fáze: Spuštění (zde použijeme malý a rychlý ASP.NET Runtime)
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /app/publish .
 
-ENV ASPNETCORE_URLS=http://+:8080
+# Produkční nastavení portů (ASP.NET 8 a 9 standardně poslouchá na 8080)
 EXPOSE 8080
-
-ENTRYPOINT ["dotnet", "hopefullyAWebForum.dll"]
+ENTRYPOINT ["dotnet", "toad.dll"]

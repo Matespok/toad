@@ -1,5 +1,5 @@
-﻿@page
-@model IndexModel
+@page
+@model toad.Pages.Register
 @{
     Layout = null;
 }
@@ -8,8 +8,8 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>TOAD | Organizes All Discussions</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TOAD | Register</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -43,33 +43,49 @@
             color: #000;
         }
 
-        .action-link {
+        /* The Toad */
+        .toad-icon {
+            color: var(--accent);
+        }
+
+        /* Brutalist Inputs */
+        .toad-input {
+            width: 100%;
+            background-color: transparent;
+            border: 2px solid var(--border);
+            color: var(--text);
+            padding: 12px 16px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0s;
+        }
+
+        .toad-input:focus {
+            border-color: var(--text);
+        }
+
+        /* Action Buttons */
+        .action-btn {
             display: inline-block;
+            width: 100%;
             border: 2px solid var(--text);
-            padding: 8px 16px;
+            padding: 12px 16px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             text-decoration: none;
+            cursor: pointer;
+            text-align: center;
         }
 
-        .action-link:hover {
+        .action-btn.primary {
             background-color: var(--text);
             color: var(--bg);
         }
 
-        .action-link.primary {
-            background-color: var(--text);
-            color: var(--bg);
-        }
-
-        .action-link.primary:hover {
+        .action-btn.primary:hover {
             background-color: transparent;
             color: var(--text);
-        }
-        
-        .toad-icon {
-            color: var(--accent);
         }
 
         /* Brutalist Theme Switcher */
@@ -98,13 +114,18 @@
         }
     </style>
 </head>
-
 <body class="min-h-screen flex flex-col items-center justify-center p-6 antialiased">
 
-    <main class="w-full max-w-2xl mx-auto space-y-8">
+    <main class="w-full max-w-md mx-auto space-y-8">
         
-        <div>
-            <svg class="toad-icon w-24 h-24 mb-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter">
+        <nav>
+            <a asp-page="Index" class="text-[var(--muted)] hover:text-[var(--text)] font-mono text-sm underline decoration-[var(--border)] underline-offset-4">
+                [ ← back to index ]
+            </a>
+        </nav>
+
+        <header class="space-y-4">
+            <svg class="toad-icon w-16 h-16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter">
                 <path d="M4 18v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2" />
                 <path d="M6 12v-2a3 3 0 0 1 6 0v2" />
                 <path d="M12 12v-2a3 3 0 0 1 6 0v2" />
@@ -118,37 +139,49 @@
                 <rect x="15" y="13" width="1" height="1" fill="currentColor" stroke="none" />
                 <rect x="9" y="17" width="1" height="1" fill="currentColor" stroke="none" />
             </svg>
-        </div>
 
-        <header class="space-y-4">
-            <h1 class="text-4xl md:text-5xl font-black tracking-tight">TOAD.</h1>
-            <p class="text-xl font-medium text-[var(--muted)]">TOAD Organizes All Discussions.</p>
+            <div>
+                <h1 class="text-3xl md:text-4xl font-black tracking-tight">Register.</h1>
+                <p class="text-[var(--muted)] font-medium mt-1">Create an account.</p>
+                @if (!string.IsNullOrEmpty(Model.WrongLogin))
+                {
+                    <div class="border-2 border-[var(--error)] text-[var(--error)] p-3 text-sm font-bold uppercase tracking-wide">
+                        Error: @Model.WrongLogin
+                    </div>
+                }
+            </div>
         </header>
 
-        <article class="prose prose-invert text-base md:text-lg border-y border-[var(--border)] py-8 space-y-4">
-            <p>
-                A calm place for real conversations. No algorithms. No engagement tricks.
-                Just people and discussions that actually matter.
-            </p>
-            <p>
-                TOAD is a lightweight open-source forum built for communities that want
-                control, privacy and simplicity.
-            </p>
-            <p>
-                Join the discussion or start your own.
-            </p>
-        </article>
+        <form method="post" class="space-y-6">
+            <div class="space-y-2">
+                <label class="block font-bold text-sm uppercase tracking-wider">Username</label>
+                <input asp-for="Uname" required 
+                    class="toad-input" 
+                    placeholder="Enter username...">
+            </div>
 
-        <nav class="flex flex-wrap gap-4 pt-4">
-            <a asp-page="Account/Register" class="action-link primary text-sm">Create account</a>
-            <a asp-page="Account/Login" class="action-link text-sm">Login</a>
-        </nav>
+            <div class="space-y-2">
+                <label class="block font-bold text-sm uppercase tracking-wider">Password</label>
+                <input asp-for="Pass" type="password" required 
+                    class="toad-input" 
+                    placeholder="••••••••••••">
+            </div>
+
+            <button type="submit" class="action-btn primary mt-4">
+                Register
+            </button>
+        </form>
+
+        <div class="pt-6 border-t border-[var(--border)] text-sm">
+            <span class="text-[var(--muted)]">Already have an account?</span>
+            <a asp-page="Login" class="font-bold hover:text-[var(--accent)] underline decoration-[var(--border)] underline-offset-4 ml-2">Login here.</a>
+        </div>
 
     </main>
 
-    <footer class="w-full max-w-2xl mx-auto mt-24 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-sm font-mono text-[var(--muted)] border-t border-[var(--border)] pt-6">
+    <footer class="w-full max-w-md mx-auto mt-16 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-sm font-mono text-[var(--muted)] border-t border-[var(--border)] pt-6">
         <div>
-            Built with C#, caffeine and curiosity.
+            Built by Matespok // C#
         </div>
         
         <div class="theme-switch-container">

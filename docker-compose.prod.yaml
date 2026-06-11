@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}
+      - ASPNETCORE_ENVIRONMENT=Production
+
+  cloudflare-tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: toadCloudflareTunnel
+    restart: always
+    command: tunnel --no-autoupdate run --token eyJhIjoiNWRiMGRmODUwMmNlMmViNWNkNjVjZDQ1MWUwYTMwZGMiLCJ0IjoiZjMwOGQ0ZDEtYWU0OS00NTExLWI0NDctNzJjZTA5ODY2MmQxIiwicyI6Ik5UY3lNR1F6TXpNdFlUWTRNaTAwTjJJMkxXSmhZelV0TjJFeE1qYzJObU14TURJMCJ9
+    depends_on: 
+      - web

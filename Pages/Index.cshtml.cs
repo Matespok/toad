@@ -1,7 +1,6 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace hopefullyAWebForum.Pages;
+namespace toad.Pages;
 
 public class IndexModel : PageModel
 {

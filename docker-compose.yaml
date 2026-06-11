@@ -1,26 +1,24 @@
+version: '3.8'
+
 services:
   db:
     image: postgres:latest
     container_name: toadAspDB
     restart: always
     environment:
-    - POSTGRES_USER=${DB_USER}
-    - POSTGRES_PASSWORD=${DB_PASSWORD}
-    - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql
 
   web:
-    build: .
     container_name: toadAspWeb
     restart: always
     ports:
-      - "8080:8080" # ASP.NET Core 9.0 default port
-    environment:
-      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}
-      - ASPNETCORE_ENVIRONMENT=Development
+      - "8080:8080"
     depends_on:
       - db
 

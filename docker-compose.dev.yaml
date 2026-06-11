@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: toadAspDB
+    restart: always
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql
+
+  web:
+    # Místo "build: ." použijeme přímo SDK obraz (rychlejší start, podpora watch)
+    image: mcr.microsoft.com/dotnet/sdk:9.0
+    container_name: toadAspWeb
+    restart: always
+    
+    # Propojíme tvůj lokální disk s vnitřkem kontejneru
+    volumes:
+      - .:/app
+    working_dir: /app
+    
+    ports:
+      - "8080:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DOTNET_WATCH_SUPPRESS_LAUNCH_BROWSER=true
+      - DOTNET_USE_POLLING_FILE_WATCHER=1 # Nutné, aby si Docker všiml, že jsi změnil soubor v PC
+    
+    # Příkaz, který spustí aplikaci v režimu sledování změn
+    command: dotnet watch run --project toad.csproj --urls http://+:8080
+    
+    depends_on:
+      - db
+
+volumes:
+  pgdata:

@@ -1,18 +1,33 @@
-using hopefullyAWebForum.Pages.Data;
-using hopefullyAWebForum.Pages.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer; // Potřebné pro JWT
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using toad.Data;
+using toad.Endpoints;
+using toad.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// 1. REGISTRACE SLUŽEB
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
+builder.Services.AddDbContextPool<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
+builder.Services.AddScoped<IForumRepository, ForumRepository>();
 
-builder.Services.Configure<CookiePolicyOptions>(options =>
-{
-    options.CheckConsentNeeded = context => false;
-    options.MinimumSameSitePolicy = SameSiteMode.None;
-});
+// JWT Autentizace (přidáno pro bezpečnost)
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("moje-super-tajne-dlouhe-heslo-pro-tokery-123456789")),
+            ValidateIssuer = false,
+            ValidateAudience = false
+        };
+    });
+builder.Services.AddAuthorization();
 
+builder.Services.AddRazorPages();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -21,30 +36,47 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-builder.Services.AddRazorPages();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+    });
+});
 
-DbMethods _db = new();
-DbMethods.SetConnectionString(connectionString);
-await _db.InitializeDbAsync();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// --- MIDDLEWARE PIPELINE ---
-
-if (!app.Environment.IsDevelopment())
+// Inicializace DB (ponecháno tak, jak máš)
+using (var scope = app.Services.CreateScope())
 {
-    app.UseExceptionHandler("/Error");
-    app.UseHsts();
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    context.Database.EnsureCreated();
 }
+
+// 2. MIDDLEWARE PIPELINE
+app.UseSwagger();
+app.UseSwaggerUI();
+
+if (app.Environment.IsDevelopment()) app.UseDeveloperExceptionPage();
+else { app.UseExceptionHandler("/Error"); app.UseHsts(); }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
-app.UseSession();
+app.UseCors("AllowAll"); // CORS politika musí být zde
+app.UseAuthentication(); // Autentizace musí být před autorizací
 app.UseAuthorization();
+app.UseSession();
 
+// 3. MAPOVÁNÍ ENDPOINTŮ
 app.MapRazorPages();
+
+app.MapCommentEndpoints();
+app.MapUserEndpoints();
+app.MapPostEndpoints();
 
 app.Run();

@@ -21,7 +21,7 @@ public class FocusPost : PageModel
     public string Reply { get; set; } = string.Empty;
 
     [BindProperty]
-    public int? ParentComment { get; set; }
+    public int? ParentCommentId { get; set; }
 
     public async Task<IActionResult> OnGetAsync(int id)
     {
@@ -43,7 +43,7 @@ public class FocusPost : PageModel
 
         if (currentUserId.HasValue && !string.IsNullOrWhiteSpace(Reply))
         {
-            await _repo.AddCommentAsync(currentUserId.Value, id, ParentComment, Reply);
+            await _repo.AddCommentAsync(currentUserId.Value, id, ParentCommentId, Reply);
         }
 
         return RedirectToPage(new { id = id });

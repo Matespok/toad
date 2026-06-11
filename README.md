@@ -8,12 +8,14 @@ The project is currently in early development. The backend and database models a
 
 * C# / .NET
 * ASP.NET Core Razor Pages
-* ADO.NET (Npgsql)
+* EF core (Npgsql)
 * BCrypt.Net
 * PostgreSQL
 * Docker
 ## Running Locally
 Follow these steps to get the project up and running on your local machine:
+
+# TO BE UPDATED!!
 
 ### 1. Prerequisites
 Ensure you have the following installed:
@@ -29,10 +31,7 @@ Ensure you have the following installed:
   *(Note: Application connects to the database using these values.
   You can leave the defaults for testing locally.)*
 
-3. Configure the app settings
-- rename **appsettings.example.json** to **appsettings.json**
-
-4. Start Docker
+3. Start Docker
    ```bash 
       docker-compose up --build
       ```
@@ -43,9 +42,9 @@ Ensure you have the following installed:
 - [X] Wrap comments and threads
 - [X] Verify if username already exists during registration,
 - [X] after registration login or tell user to do so.
-- [ ] Implement replies to comments
+- [X] Implement replies to comments
 - [X] Display user profiles, their threads, and replies
 - [ ] Improve navigation (`<aside>` panel)
 - [ ] Limit maximum input length and implement rate limiting
-- [ ] Rewrite dbmethods to Dapper
-- [ ] Dependency injection
+- [X] Rewrote methods to EF CORE
+- [X] Dependency injection

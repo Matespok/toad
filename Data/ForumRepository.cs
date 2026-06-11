@@ -157,10 +157,11 @@ public class ForumRepository : IForumRepository
             .OrderByDescending(c => c.CommentedAt)
             .Select(c => new CommentDTO
             {
+                Id = c.CommentId, 
                 AuthorName = c.User.Username,
                 UserId =  c.UserId,
                 PostId = c.PostId,
-                ParentCommentId = c.ParentCommentId ?? 0,
+                ParentCommentId = c.ParentCommentId,
                 Content = c.Content,
                 CommentedAt = c.CommentedAt,
             })

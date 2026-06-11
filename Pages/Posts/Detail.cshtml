@@ -1,4 +1,4 @@
-@page
+@page "{id:int}"
 @model toad.Pages.FocusPost
 @{ Layout = null; }
 
@@ -16,6 +16,8 @@
             --muted: #888888;
             --border: #222222;
             --accent: #4ade80;
+            --accent-dim: rgba(74, 222, 128, 0.08);
+            --highlight: rgba(74, 222, 128, 0.13);
         }
         .light-mode {
             --bg: #ffffff;
@@ -23,6 +25,8 @@
             --muted: #666666;
             --border: #eeeeee;
             --accent: #16a34a;
+            --accent-dim: rgba(22, 163, 74, 0.06);
+            --highlight: rgba(22, 163, 74, 0.10);
         }
         body {
             font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -30,14 +34,11 @@
             color: var(--text);
             line-height: 1.6;
         }
-
-        /* KLÍČOVÉ OPRAVY PRO ZALAMOVÁNÍ */
         .content-wrap {
-            overflow-wrap: anywhere; 
+            overflow-wrap: anywhere;
             word-break: normal;
             hyphens: auto;
         }
-
         .theme-btn {
             padding: 4px 12px;
             cursor: pointer;
@@ -47,36 +48,86 @@
             border: 1px solid var(--border);
         }
         .theme-btn.active { background: var(--text); color: var(--bg); }
-        
-        input, textarea {
+
+        textarea {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--border);
             color: var(--text);
-            padding: 16px;
+            padding: 14px;
             width: 100%;
             outline: none;
-            transition: all 0.2s;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: border-color 0.2s, background 0.2s;
         }
         .light-mode textarea { background: rgba(0, 0, 0, 0.02); }
-        
-        input:focus, textarea:focus { 
-            border-color: var(--accent);
-            background: transparent;
-        }
+        textarea:focus { border-color: var(--accent); background: transparent; }
 
         .btn {
-            border: 1px solid var(--text);
-            padding: 8px 16px;
+            border: 1px solid var(--border);
+            padding: 6px 14px;
             font-weight: 700;
             text-transform: uppercase;
-            font-size: 0.75rem;
-            transition: 0.2s;
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            background: transparent;
+            color: var(--text);
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
         }
-        .btn:hover { background: var(--text); color: var(--bg); }
+        .btn:hover { background: var(--text); color: var(--bg); border-color: var(--text); }
+        .btn-accent { border-color: var(--accent); color: var(--accent); }
+        .btn-accent:hover { background: var(--accent); color: #000; border-color: var(--accent); }
 
-        .user-green {
-            color: var(--accent);
-            font-weight: 400;
+        .user-green { color: var(--accent); font-weight: 500; }
+        .user-green:hover { text-decoration: underline; }
+
+        /* Reply form slide */
+        .reply-area {
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transition: max-height 0.3s ease, opacity 0.25s ease, margin-top 0.2s ease;
+            margin-top: 0;
+        }
+        .reply-area.open {
+            max-height: 400px;
+            opacity: 1;
+            margin-top: 16px;
+        }
+
+        /* Quote strip in reply form */
+        .reply-quote {
+            border-left: 2px solid var(--accent);
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            color: var(--muted);
+            background: var(--accent-dim);
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+
+        /* Thread indent */
+        .thread-indent {
+            border-left: 1px solid var(--border);
+            margin-left: 20px;
+            padding-left: 20px;
+        }
+
+        /* Comment highlight on hover */
+        .comment-block {
+            padding: 10px 12px;
+            margin: -10px -12px;
+            border-radius: 2px;
+            transition: background 0.2s;
+        }
+        .comment-block.is-highlighted {
+            background: var(--highlight);
         }
     </style>
 </head>
@@ -91,49 +142,133 @@
     </nav>
 
     <main class="max-w-2xl mx-auto px-6 pb-24">
+
+        <!-- ── Original post ─────────────────────────────────── -->
         <article class="mb-16">
             <header class="mb-8">
                 <div class="flex items-center gap-3 text-xs font-medium text-[var(--muted)] uppercase tracking-wider">
-                    <span class="text-[var(--text)]">From:<a asp-page="/Users/Profile" asp-route-id="@Model.FocusedPost.UserId" class="user-green">@Model.FocusedPost.AuthorName</a></span>
+                    <span>
+                        From:&nbsp;<a asp-page="/Users/Profile" asp-route-id="@Model.FocusedPost.UserId" class="user-green">@Model.FocusedPost.AuthorName</a>
+                    </span>
                     <span>•</span>
-                    <span>On: @Model.FocusedPost.CreatedAt.ToString("dd MMMM, yyyy")</span>
+                    <span>@Model.FocusedPost.CreatedAt.ToString("dd MMMM, yyyy")</span>
                 </div>
-                <h1 class="text-3xl md:text-4xl font-black tracking-tight leading-tight mt-2 mb-4 break-all">
+                <h1 class="text-3xl md:text-4xl font-black tracking-tight leading-tight mt-2 mb-4">
                     @Model.FocusedPost.Topic
                 </h1>
             </header>
+
             <hr class="border-[var(--border)]" />
-            
-            <div class="text-lg text-[var(--text)] whitespace-pre-wrap my-10 leading-relaxed content-wrap">@Model.FocusedPost.Content</div>
 
-            <button onclick="document.getElementById('reply-area').classList.toggle('hidden')" class="btn">
-                Reply
-            </button>
+            <div class="text-lg text-[var(--text)] whitespace-pre-wrap my-10 leading-relaxed content-wrap">
+                @Model.FocusedPost.Content
+            </div>
 
-            <div id="reply-area" class="mt-8 hidden">
-                <form method="post" class="space-y-4">
-                    <textarea asp-for="Reply" rows="5" placeholder="Write your response..."></textarea>
-                    <div class="flex justify-end">
-                        <button type="submit" class="btn">Submit Post</button>
+            <button onclick="toggleReply('post-reply')" class="btn btn-accent">Reply to post</button>
+
+            <div id="post-reply" class="reply-area">
+                <form method="post" class="space-y-3">
+                    <textarea name="Reply" rows="5" placeholder="Write your response…"></textarea>
+                    <div class="flex justify-end gap-2">
+                        <button type="button" onclick="toggleReply('post-reply')" class="btn">Cancel</button>
+                        <button type="submit" class="btn btn-accent">Post reply</button>
                     </div>
                 </form>
             </div>
         </article>
 
+        <!-- ── Comments ──────────────────────────────────────── -->
         <section>
             <h2 class="text-xs font-black uppercase tracking-[0.2em] text-[var(--muted)] mb-8 border-b border-[var(--border)] pb-2">
-                @Model.CommentList.Count Responses
+                @Model.CommentList.Count @(Model.CommentList.Count == 1 ? "Response" : "Responses")
             </h2>
 
-            <div class="space-y-12">
-                @foreach(var comment in Model.CommentList) {
-                    <div class="space-y-3">
-                        <div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest opacity-80">
-                            <span class="opacity-50">From:</span>
-                            <span class="user-green"><a asp-page="/Users/Profile" asp-route-id="@comment.UserId" class="user-green">@comment.AuthorName</a></span>
-                            <span class="opacity-40 ml-1">On: @comment.CommentedAt.ToString("dd. MM., yyyy")</span>
+            <div class="space-y-10">
+                @foreach (var rootComment in Model.CommentList.Where(c => c.ParentCommentId == null))
+                {
+                    <!-- Root comment -->
+                    <div>
+                        <div id="comment-@rootComment.Id" class="comment-block space-y-2">
+                            <div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[var(--muted)]">
+                                <a asp-page="/Users/Profile" asp-route-id="@rootComment.UserId" class="user-green">@rootComment.AuthorName</a>
+                                <span class="opacity-40">·</span>
+                                <span class="opacity-60">@rootComment.CommentedAt.ToString("dd MMM yyyy")</span>
+                            </div>
+                            <div class="text-base leading-relaxed content-wrap whitespace-pre-wrap">@rootComment.Content</div>
+                            <button onclick="toggleReply('r-@rootComment.Id')" class="btn text-[10px] mt-1">↳ Reply</button>
+                            <div id="r-@rootComment.Id" class="reply-area">
+                                <form method="post" class="space-y-3">
+                                    <input type="hidden" name="ParentCommentId" value="@rootComment.Id" />
+                                    <div class="reply-quote">@rootComment.Content</div>
+                                    <textarea name="Reply" rows="4" placeholder="Replying to @rootComment.AuthorName…"></textarea>
+                                    <div class="flex justify-end gap-2">
+                                        <button type="button" onclick="toggleReply('r-@rootComment.Id')" class="btn">Cancel</button>
+                                        <button type="submit" class="btn btn-accent">Post reply</button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-                        <div class="text-base opacity-90 leading-relaxed content-wrap break-all whitespace-pre-wrap">@comment.Content</div>
+
+                        <!-- Nested replies (BFS, flattened) -->
+                        @{
+                            var replies = new List<toad.DTOs.CommentDTO>();
+                            var queue = new Queue<int>();
+                            queue.Enqueue(rootComment.Id);
+                            while (queue.Count > 0)
+                            {
+                                var parentId = queue.Dequeue();
+                                var children = Model.CommentList
+                                    .Where(c => c.ParentCommentId == parentId)
+                                    .ToList();
+                                foreach (var child in children)
+                                {
+                                    replies.Add(child);
+                                    queue.Enqueue(child.Id);
+                                }
+                            }
+                        }
+
+                        @if (replies.Any())
+                        {
+                            <div class="thread-indent mt-6 space-y-6">
+                                @foreach (var reply in replies)
+                                {
+                                    
+                                        var replyingTo = Model.CommentList
+                                            .FirstOrDefault(c => c.Id == reply.ParentCommentId);
+                                    
+                                    <div id="comment-@reply.Id"
+                                         class="comment-block space-y-2"
+                                         data-parent="comment-@reply.ParentCommentId"
+                                         onmouseenter="highlightParent(this)"
+                                         onmouseleave="clearHighlight(this)">
+                                        <div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[var(--muted)]">
+                                            <a asp-page="/Users/Profile" asp-route-id="@reply.UserId" class="user-green">@reply.AuthorName</a>
+                                            @if (replyingTo != null)
+                                            {
+                                                <span class="opacity-40">↳</span>
+                                                <a asp-page="/Users/Profile" asp-route-id="@replyingTo.UserId" class="opacity-60 hover:opacity-100 hover:underline" style="color: var(--muted)">@replyingTo.AuthorName</a>
+                                            }
+                                            <span class="opacity-40">·</span>
+                                            <span class="opacity-60">@reply.CommentedAt.ToString("dd MMM yyyy")</span>
+                                        </div>
+                                        <div class="text-base leading-relaxed content-wrap whitespace-pre-wrap">@reply.Content</div>
+                                        <button onclick="toggleReply('r-@reply.Id')" class="btn text-[10px] mt-1">↳ Reply</button>
+                                        <div id="r-@reply.Id" class="reply-area">
+                                            <form method="post" class="space-y-3">
+                                                <input type="hidden" name="ParentCommentId" value="@reply.Id" />
+                                                <div class="reply-quote">@reply.Content</div>
+                                                <textarea name="Reply" rows="3" placeholder="Replying to @reply.AuthorName…"></textarea>
+                                                <div class="flex justify-end gap-2">
+                                                    <button type="button" onclick="toggleReply('r-@reply.Id')" class="btn">Cancel</button>
+                                                    <button type="submit" class="btn btn-accent">Post reply</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
                     </div>
                 }
             </div>
@@ -145,28 +280,47 @@
     </footer>
 
     <script>
+        // ── Theme ──────────────────────────────────────────────
         const body = document.body;
         const btnDark = document.getElementById('btnDark');
         const btnLight = document.getElementById('btnLight');
 
         function setTheme(isLight) {
-            if (isLight) {
-                body.classList.add('light-mode');
-                btnLight.classList.add('active');
-                btnDark.classList.remove('active');
-                localStorage.setItem('theme', 'light');
-            } else {
-                body.classList.remove('light-mode');
-                btnDark.classList.add('active');
-                btnLight.classList.remove('active');
-                localStorage.setItem('theme', 'dark');
+            body.classList.toggle('light-mode', isLight);
+            btnLight.classList.toggle('active', isLight);
+            btnDark.classList.toggle('active', !isLight);
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        }
+
+        if (localStorage.getItem('theme') === 'light') setTheme(true);
+        btnLight.addEventListener('click', () => setTheme(true));
+        btnDark.addEventListener('click', () => setTheme(false));
+
+        // ── Reply toggle ───────────────────────────────────────
+        function toggleReply(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const isOpen = el.classList.toggle('open');
+            if (isOpen) {
+                const ta = el.querySelector('textarea');
+                if (ta) setTimeout(() => ta.focus(), 150);
             }
         }
 
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'light') setTheme(true);
-        btnLight.addEventListener('click', () => setTheme(true));
-        btnDark.addEventListener('click', () => setTheme(false));
+        // ── Parent highlight on hover ──────────────────────────
+        function highlightParent(el) {
+            const parentId = el.dataset.parent;
+            if (!parentId) return;
+            const parent = document.getElementById(parentId);
+            if (parent) parent.classList.add('is-highlighted');
+        }
+
+        function clearHighlight(el) {
+            const parentId = el.dataset.parent;
+            if (!parentId) return;
+            const parent = document.getElementById(parentId);
+            if (parent) parent.classList.remove('is-highlighted');
+        }
     </script>
 </body>
 </html>

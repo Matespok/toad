@@ -2,7 +2,7 @@
 
 This is the first alpha version of a simple web forum built with C# and ASP.NET Core Razor Pages, using a PostgreSQL database.
 
-The project is currently in early development. The backend and database models are functional, but the frontend, design, and overall layout are still being unified and adjusted.
+The project is currently in early development. The backend and database models are functional, but the frontend, design, and overall layout are still being unified and adjusted. Also Iˇm aware of most security flaws this project has.
 
 ## Technologies Used
 

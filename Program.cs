@@ -1,28 +1,40 @@
+using System.Text;
+using dotenv.net;
 using Microsoft.AspNetCore.Authentication.JwtBearer; // Potřebné pro JWT
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using toad.Data;
 using toad.Endpoints;
 using toad.Repositories;
+using toad.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // 1. REGISTRACE SLUŽEB
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContextPool<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
+builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
+    options.UseNpgsql(connectionString)
+);
 builder.Services.AddScoped<IForumRepository, ForumRepository>();
 
-// JWT Autentizace (přidáno pro bezpečnost)
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+// JWT Autentizace
+var envVars = DotEnv.Read();
+if (!envVars.TryGetValue("JWTKEY", out var jwtKey))
+{
+    throw new InvalidOperationException("JWTKEY is missing from the environment variables.");
+}
+
+builder.Services.AddSingleton<JwtService>();
+builder
+    .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("moje-super-tajne-dlouhe-heslo-pro-tokery-123456789")),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
             ValidateIssuer = false,
-            ValidateAudience = false
+            ValidateAudience = false,
         };
     });
 builder.Services.AddAuthorization();
@@ -38,10 +50,13 @@ builder.Services.AddSession(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-    });
+    options.AddPolicy(
+        "AllowAll",
+        policy =>
+        {
+            policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+        }
+    );
 });
 
 builder.Services.AddEndpointsApiExplorer();
@@ -49,7 +64,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Inicializace DB (ponecháno tak, jak máš)
+// Inicializace DB
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -60,8 +75,13 @@ using (var scope = app.Services.CreateScope())
 app.UseSwagger();
 app.UseSwaggerUI();
 
-if (app.Environment.IsDevelopment()) app.UseDeveloperExceptionPage();
-else { app.UseExceptionHandler("/Error"); app.UseHsts(); }
+if (app.Environment.IsDevelopment())
+    app.UseDeveloperExceptionPage();
+else
+{
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
+}
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using toad.Data.Entities; // Případně uprav na toad.Pages.Models podle toho, kde máš schované *Entity třídy
+using toad.Data.Entities;
 
 namespace toad.Data;
 
@@ -9,7 +9,6 @@ public class ApplicationDbContext : DbContext
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options) { }
 
-    // Tvoje databázové tabulky (opravená syntaxe bez šipek)
     public DbSet<UserEntity> Users { get; set; } = null!;
     public DbSet<PostEntity> Posts { get; set; } = null!;
     public DbSet<CommentEntity> Comments { get; set; } = null!;
